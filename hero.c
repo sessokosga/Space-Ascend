@@ -17,8 +17,8 @@ Hero loadHero()
 
 void addHeroAnim(Hero* pHero, Anim pAnim)
 {
-    pHero->listAnim[pHero->animCount] = pAnim;
-    pHero->animCount++;
+    pHero->listAnim[pHero->animCount++] = pAnim;
+
 }
 
 void playHeroAnim(Hero *pHero, const HeroState pId)
@@ -46,6 +46,7 @@ void playHeroAnim(Hero *pHero, const HeroState pId)
 
 void updateHero(Hero *pHero, float dt)
 {
+    if (pHero->state != DEAD){
     pHero->velocity.x=pHero->velocity.y=0;
     state = pHero->state;
 
@@ -65,25 +66,23 @@ void updateHero(Hero *pHero, float dt)
             pHero->flipX=1;
         }
 
-        if(IsKeyDown(KEY_W))
-        {
-            pHero->velocity.y=-2;
-            state = RUN;
-        }
-
-        if(IsKeyDown(KEY_S))
-        {
-            pHero->velocity.y=+2;
-            state = RUN;
-        }
-
-        if(IsKeyUp(KEY_W)&&IsKeyUp(KEY_A)&&IsKeyUp(KEY_S)&&IsKeyUp(KEY_D) && pHero->currentAnim.id == RUN)
+        if(IsKeyUp(KEY_A) && IsKeyUp(KEY_D) && pHero->currentAnim.id == RUN)
         {
             state = IDLE;
         }
 
     }
 
+
+    if(IsKeyDown(KEY_W))
+    {
+        state =JUMP;
+    }
+
+    if(IsKeyDown(KEY_S))
+    {
+        state = EAT;
+    }
 
     if(IsKeyDown(KEY_I))
     {
@@ -95,13 +94,27 @@ void updateHero(Hero *pHero, float dt)
         state = ATTACK_2;
     }
 
+    if(IsKeyDown(KEY_M))
+    {
+        state = DEAD;
+    }
+
+    if(IsKeyDown(KEY_H))
+    {
+        state = HURT;
+    }
+
+
+
+
+
 
     pHero->pos.x+=pHero->velocity.x;
     pHero->pos.y+=pHero->velocity.y;
 
     // Play the right animation
     pHero->state = state;
-    if(pHero->currentAnim.ended==1)
+    if(pHero->currentAnim.ended==1 && pHero->state!=DEAD)
     {
         pHero->state = IDLE;
     }
@@ -116,6 +129,18 @@ void updateHero(Hero *pHero, float dt)
     case ATTACK_2:
         playHeroAnim(pHero,ATTACK_2);
         break;
+    case JUMP:
+        playHeroAnim(pHero,JUMP);
+        break;
+    case EAT:
+        playHeroAnim(pHero,EAT);
+        break;
+        case HURT:
+        playHeroAnim(pHero,HURT);
+        break;
+        case DEAD:
+        playHeroAnim(pHero,DEAD);
+        break;
     default :
         playHeroAnim(pHero,IDLE);
         break;
@@ -124,14 +149,17 @@ void updateHero(Hero *pHero, float dt)
 
 
 
+
     pHero->currentAnim.pos = pHero->pos;
-    if(pHero->currentAnim.flipX != pHero->flipX){
+    if(pHero->currentAnim.flipX != pHero->flipX)
+    {
         flipAnimHorizontal(&pHero->currentAnim);
     }
-    if (pHero->currentAnim.flipY != pHero->flipY){
+    if (pHero->currentAnim.flipY != pHero->flipY)
+    {
         flipAnimVertical(&pHero->currentAnim);
     }
-
+}
     updateAnim(&pHero->currentAnim);
 }
 

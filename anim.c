@@ -46,6 +46,7 @@ void updateAnim(Anim *pAnim)
                 else
                 {
                     pAnim->ended = 1;
+                    pAnim->currentFrame = pAnim->maxFrame;
                 }
             }
             pAnim->frameRec.x = (float)pAnim->currentFrame * (float)(pAnim->texture.width / (pAnim->maxFrame + 1));

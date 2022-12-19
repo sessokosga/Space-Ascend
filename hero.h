@@ -12,7 +12,9 @@ typedef enum {
     JUMP=2,
     ATTACK_1=3,
     ATTACK_2=4,
-    DEAD=5
+    DEAD=5,
+    EAT=6,
+    HURT=7
 } HeroState;
 
 typedef struct

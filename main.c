@@ -19,25 +19,29 @@ int main(void)
 {
     // Initialization
     //--------------------------------------------------------------------------------------
-    const int screenWidth = 800;
-    const int screenHeight = 450;
+    const int screenWidth = SCREEN_WIDTH;
+    const int screenHeight = SCREEN_HEIGHT;
     float dt;
 
-    InitWindow(screenWidth, screenHeight, "Learning Raylib");
+    InitWindow(screenWidth, screenHeight, GAME_TITLE);
 
     projectileCount=0;
 
     Hero kunoichi = loadHero();
     kunoichi.pos.x=100;
-    kunoichi.pos.y=200;
+    kunoichi.pos.y=300;
     addHeroAnim(&kunoichi,LoadAnim("resources/images/Kunoichi/Run.png",RUN,8, 7,1));
     addHeroAnim(&kunoichi,LoadAnim("resources/images/Kunoichi/Idle.png",IDLE,8, 8,1));
     addHeroAnim(&kunoichi,LoadAnim("resources/images/Kunoichi/Attack_1.png",ATTACK_1,10, 5,0));
     addHeroAnim(&kunoichi,LoadAnim("resources/images/Kunoichi/Attack_2.png",ATTACK_2,15, 7,0));
+    addHeroAnim(&kunoichi,LoadAnim("resources/images/Kunoichi/Jump.png",JUMP,12, 9,0));
+    addHeroAnim(&kunoichi,LoadAnim("resources/images/Kunoichi/Eating.png",EAT,8, 8,0));
+    addHeroAnim(&kunoichi,LoadAnim("resources/images/Kunoichi/Dead.png",DEAD,8, 4,0));
+    addHeroAnim(&kunoichi,LoadAnim("resources/images/Kunoichi/Hurt.png",HURT,4, 1,0));
 
-    Image imgProj = LoadImage("resources/images/Kunoichi/Spine.png");
-    Projectile proj =  loadProjectile(10,20,LoadTextureFromImage(imgProj));
-    proj.velocity.x=2;
+    //Image imgProj = LoadImage("resources/images/Kunoichi/Spine.png");
+    //Projectile proj =  loadProjectile(10,20,LoadTextureFromImage(imgProj));
+    //proj.velocity.x=2;
 
 
     //playHeroAnim(&kunoichi,IDLE);
@@ -53,7 +57,7 @@ int main(void)
         dt = GetFrameTime();
 
         updateHero(&kunoichi,dt);
-        updateProjectile(&proj);
+        //updateProjectile(&proj);
 
         //----------------------------------------------------------------------------------
 
@@ -64,7 +68,7 @@ int main(void)
 
 
         drawHero(kunoichi);
-        drawProjectile(proj);
+        //drawProjectile(proj);
 
         EndDrawing();
         //----------------------------------------------------------------------------------
@@ -74,7 +78,7 @@ int main(void)
     //--------------------------------------------------------------------------------------
 
     unloadHero(kunoichi);
-    unloadProjectile(proj);
+//    unloadProjectile(proj);
 
     CloseWindow(); // Close window and OpenGL context
     //--------------------------------------------------------------------------------------

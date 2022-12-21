@@ -95,12 +95,18 @@ int main(void)
 
 
     // Box
-    Hero hitBox = loadHero();
-    hitBox.pos.x=120;
-    hitBox.pos.y=430;
-    hitBox.type = HITBOX;
-    addHeroAnim(&hitBox,LoadAnim("resources/images/Bomb_03.png",IDLE,1,0,0));
-    addHeroAnim(&hitBox,LoadAnim("resources/images/Bomb_02.png",HURT,1,0,0));
+    Button btnHit;
+    Image imgHit = LoadImage("resources/images/BtnHit/Bomb_03.png");
+    btnHit.texture = LoadTextureFromImage(imgHit);
+    Image imgHitAct = LoadImage("resources/images/BtnHit/Bomb_02.png");
+    btnHit.textureActive = LoadTextureFromImage(imgHitAct);
+    btnHit.pos.x=120;
+    btnHit.pos.y=430;
+    btnHit.isActive=0;
+    UnloadImage(imgHit);
+    UnloadImage(imgHitAct);
+
+
 
     //playHeroAnim(&kunoichi,IDLE);
 
@@ -122,8 +128,29 @@ int main(void)
         btnRight.isActive = isColliding(btnRight.pos.x,btnRight.pos.y,btnRight.texture.width,btnRight.texture.height,
                 kunoichi.pos.x+50,kunoichi.pos.y+109,20,20);
 
+        // Hit button
+        printf("kunoichi %lf\n",kunoichi.pos.x);
+        if (kunoichi.pos.x>=0){
+        if (kunoichi.state == ATTACK_1){
+            if (kunoichi.currentAnim.currentFrame == 3 ){
+                btnHit.isActive=1;
+            }else{
+                    btnHit.isActive=0;
+            }
+        }
+        if (kunoichi.state == ATTACK_2){
+            if (kunoichi.currentAnim.currentFrame == 5 ){
+                btnHit.isActive=1;
+            }else{
+                    btnHit.isActive=0;
+            }
+        }
+        }
+        //btnHit.isActive = isColliding(btnHit.pos.x,btnHit.pos.y,btnHit.texture.width,btnHit.texture.height,
+                //kunoichi.pos.x+50,kunoichi.pos.y+109,20,20);
+
+
         updateHero(&kunoichi,dt);
-        updateHero(&hitBox,dt);
         updateProjectile(&proj);
 
         //----------------------------------------------------------------------------------
@@ -151,11 +178,19 @@ int main(void)
         else
             DrawTexture(btnRight.textureActive,btnRight.pos.x,btnRight.pos.y,WHITE);
 
+        // Hit button
+        if (btnHit.isActive==0)
+            DrawTexture(btnHit.texture,btnHit.pos.x,btnHit.pos.y,WHITE);
+        else
+            DrawTexture(btnHit.textureActive,btnHit.pos.x,btnHit.pos.y,WHITE);
+
+
+
         // Hero
         drawHero(kunoichi);
 
-        // Box
-        drawHero(hitBox);
+
+
 
         // Projectiles
         drawProjectile(proj);
@@ -168,7 +203,6 @@ int main(void)
     //--------------------------------------------------------------------------------------
 
     unloadHero(kunoichi);
-    unloadHero(hitBox);
     unloadProjectile(proj);
     UnloadTexture(bgPurple);
     UnloadTexture(bgStarfield);
@@ -176,6 +210,8 @@ int main(void)
     UnloadTexture(btnLeft.textureActive);
     UnloadTexture(btnRight.texture);
     UnloadTexture(btnRight.textureActive);
+    UnloadTexture(btnHit.texture);
+    UnloadTexture(btnHit.textureActive);
 
 
     CloseWindow(); // Close window and OpenGL context

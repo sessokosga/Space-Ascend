@@ -4,7 +4,13 @@
 #include "projectile.h"
 #include "constants.h"
 
-typedef struct Button{
+int isColliding( float x1, float y1, float w1,float h1,float x2, float y2,float w2,float h2)
+{
+    return x1 < x2 + w2 && x2 < x1 + w1 && y1 < y2 + h2 && y2 < y1 + h1;
+}
+
+typedef struct Button
+{
     Texture texture,textureActive;
     Vector2 pos;
     int isActive;
@@ -108,6 +114,14 @@ int main(void)
         //----------------------------------------------------------------------------------
         dt = GetFrameTime();
 
+        // Left button
+        btnLeft.isActive = isColliding(btnLeft.pos.x,btnLeft.pos.y,btnLeft.texture.width,btnLeft.texture.height,
+                kunoichi.pos.x+60,kunoichi.pos.y+109,20,20);
+
+        // Right button
+        btnRight.isActive = isColliding(btnRight.pos.x,btnRight.pos.y,btnRight.texture.width,btnRight.texture.height,
+                kunoichi.pos.x+50,kunoichi.pos.y+109,20,20);
+
         updateHero(&kunoichi,dt);
         updateHero(&hitBox,dt);
         updateProjectile(&proj);
@@ -129,13 +143,13 @@ int main(void)
         if (btnLeft.isActive==0)
             DrawTexture(btnLeft.texture,btnLeft.pos.x,btnLeft.pos.y,WHITE);
         else
-            DrawTexture(btnLeft.texture,btnLeft.pos.x,btnLeft.pos.y,WHITE);
+            DrawTexture(btnLeft.textureActive,btnLeft.pos.x,btnLeft.pos.y,WHITE);
 
         // Right button
         if (btnRight.isActive==0)
             DrawTexture(btnRight.texture,btnRight.pos.x,btnRight.pos.y,WHITE);
         else
-            DrawTexture(btnRight.texture,btnRight.pos.x,btnRight.pos.y,WHITE);
+            DrawTexture(btnRight.textureActive,btnRight.pos.x,btnRight.pos.y,WHITE);
 
         // Hero
         drawHero(kunoichi);

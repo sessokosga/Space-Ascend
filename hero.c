@@ -56,16 +56,20 @@ void updateHero(Hero *pHero, float dt)
             {
                 if(IsKeyDown(KEY_A))
                 {
-                    pHero->velocity.x=-2;
-                    pHero->flipX=-1;
+                    if (pHero->pos.x> -40){
+                        pHero->velocity.x=-2;
+                        pHero->flipX=-1;
+                    }
                     state = RUN;
                 }
 
                 if(IsKeyDown(KEY_D))
                 {
-                    pHero->velocity.x=+2;
+                    if (pHero->pos.x< 26){
+                        pHero->velocity.x=+2;
+                        pHero->flipX=1;
+                    }
                     state = RUN;
-                    pHero->flipX=1;
                 }
 
                 if(IsKeyUp(KEY_A) && IsKeyUp(KEY_D) && pHero->currentAnim.id == RUN)

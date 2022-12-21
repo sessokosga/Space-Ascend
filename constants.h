@@ -3,7 +3,7 @@
 
 #define MAX_PROJECTILE 100
 #define SCREEN_WIDTH 512
-#define SCREEN_HEIGHT 512
+#define SCREEN_HEIGHT 700
 #define GAME_TITLE "Zeno Jam 6"
 
 #endif // CONSTANTS_H_INCLUDED

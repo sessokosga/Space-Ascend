@@ -132,14 +132,12 @@ void updateHero(Hero *pHero, float dt)
                 pHero->velocity.x=0;
             }
 
-
-
             float res = pHero->pos.x+pHero->velocity.x;
             if(!(res+55>SCREEN_WIDTH || res<138))
                 pHero->pos.x = res;
 
 
-
+            pHero->pos.y+=pHero->velocity.y;
         }
 
 

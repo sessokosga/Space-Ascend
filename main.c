@@ -66,7 +66,7 @@ int main(void)
     // Ship
     Hero ship = loadHero();
     ship.pos.x = 300;
-    ship.pos.y=420;
+    ship.pos.y=SCREEN_HEIGHT-92;
     ship.type = SHIP;
     addHeroAnim(&ship,LoadAnim("resources/images/Ship3/Ship3.png",IDLE,1,0,1));
     addHeroAnim(&ship,LoadAnim("resources/images/Ship3/Ship3_Explosion.png",DEAD,8,10,0));
@@ -78,7 +78,7 @@ int main(void)
     Image imgLeftAct = LoadImage("resources/images/Btn_Active/Backward_BTN.png");
     btnLeft.textureActive = LoadTextureFromImage(imgLeftAct);
     btnLeft.pos.x=10;
-    btnLeft.pos.y=460;
+    btnLeft.pos.y=SCREEN_HEIGHT-52;
     btnLeft.isActive=0;
     UnloadImage(imgLeft);
     UnloadImage(imgLeftAct);
@@ -90,7 +90,7 @@ int main(void)
     Image imgRightAct = LoadImage("resources/images/Btn_Active/Forward_BTN.png");
     btnRight.textureActive = LoadTextureFromImage(imgRightAct);
     btnRight.pos.x=80;
-    btnRight.pos.y=460;
+    btnRight.pos.y=SCREEN_HEIGHT-52;
     btnRight.isActive=0;
     UnloadImage(imgRight);
     UnloadImage(imgRightAct);
@@ -104,7 +104,7 @@ int main(void)
     Image imgHitAct = LoadImage("resources/images/BtnHit/Bomb_02.png");
     btnHit.textureActive = LoadTextureFromImage(imgHitAct);
     btnHit.pos.x=120;
-    btnHit.pos.y=430;
+    btnHit.pos.y=SCREEN_HEIGHT-82;
     btnHit.isActive=0;
     UnloadImage(imgHit);
     UnloadImage(imgHitAct);
@@ -148,6 +148,7 @@ int main(void)
         if (kunoichi.state == ATTACK_1){
             if (kunoichi.currentAnim.currentFrame == 3 ){
                 btnHit.isActive=1;
+                ship.velocity.y=-1;
             }else{
                     btnHit.isActive=0;
             }
@@ -178,7 +179,7 @@ int main(void)
         if (currentBG==1)
             DrawTexture(bgStarfield,0,0,WHITE);
         else
-            DrawTexture(bgStarfield,0,0,WHITE);
+            DrawTexture(bgPurple,0,0,WHITE);
 
         // Left button
         if (btnLeft.isActive==0)

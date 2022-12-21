@@ -126,13 +126,24 @@ int main(void)
         // Left button
         btnLeft.isActive = isColliding(btnLeft.pos.x,btnLeft.pos.y,btnLeft.texture.width,btnLeft.texture.height,
                 kunoichi.pos.x+60,kunoichi.pos.y+109,20,20);
+        if(btnLeft.isActive==1){
+            ship.velocity.x=-3;
+        }
 
         // Right button
         btnRight.isActive = isColliding(btnRight.pos.x,btnRight.pos.y,btnRight.texture.width,btnRight.texture.height,
                 kunoichi.pos.x+50,kunoichi.pos.y+109,20,20);
+        if (btnRight.isActive==1){
+            ship.velocity.x=3;
+        }
+
+        if (btnRight.isActive==0 && btnLeft.isActive==0)
+            ship.velocity.x=0;
+
+
+        //printf("Ship x: %lf\n",ship.pos.x+ship.currentAnim.frameRec.width);
 
         // Hit button
-        printf("kunoichi %lf\n",kunoichi.pos.x);
         if (kunoichi.pos.x>=0){
         if (kunoichi.state == ATTACK_1){
             if (kunoichi.currentAnim.currentFrame == 3 ){

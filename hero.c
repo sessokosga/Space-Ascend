@@ -1,4 +1,5 @@
 #include "hero.h"
+#include "constants.h"
 
 HeroState state;
 Hero loadHero()
@@ -48,7 +49,8 @@ void updateHero(Hero *pHero, float dt)
 {
     if (pHero->state != DEAD)
     {
-        pHero->velocity.x=pHero->velocity.y=0;
+        if (pHero->type == HERO)
+            pHero->velocity.x=pHero->velocity.y=0;
         state = pHero->state;
         if(pHero->type == HERO)
         {
@@ -56,7 +58,8 @@ void updateHero(Hero *pHero, float dt)
             {
                 if(IsKeyDown(KEY_A))
                 {
-                    if (pHero->pos.x> -40){
+                    if (pHero->pos.x> -40)
+                    {
                         pHero->velocity.x=-2;
                         pHero->flipX=-1;
                     }
@@ -65,7 +68,8 @@ void updateHero(Hero *pHero, float dt)
 
                 if(IsKeyDown(KEY_D))
                 {
-                    if (pHero->pos.x< 26){
+                    if (pHero->pos.x< 26)
+                    {
                         pHero->velocity.x=+2;
                         pHero->flipX=1;
                     }
@@ -114,6 +118,33 @@ void updateHero(Hero *pHero, float dt)
             pHero->pos.y+=pHero->velocity.y;
 
         }
+        printf("x: %lf\n",pHero->pos.x);
+        if(pHero->type==SHIP)
+        {
+            if(pHero->pos.x+55 > SCREEN_WIDTH)
+            {
+                pHero->pos.x = (float)(SCREEN_WIDTH - 55);
+                pHero->velocity.x=0;
+            }
+            else if(pHero->pos.x<138)
+            {
+                pHero->pos.x = 138;
+                pHero->velocity.x=0;
+            }
+
+
+
+            float res = pHero->pos.x+pHero->velocity.x;
+            if(!(res+55>SCREEN_WIDTH || res<138))
+                pHero->pos.x = res;
+
+
+
+        }
+
+
+
+
         // Play the right animation
         pHero->state = state;
         if(pHero->currentAnim.ended==1 && pHero->state!=DEAD)

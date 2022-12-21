@@ -59,14 +59,17 @@ int main(void)
     addHeroAnim(&kunoichi,LoadAnim("resources/images/Kunoichi/Attack_1.png",ATTACK_1,10, 5,0));
     addHeroAnim(&kunoichi,LoadAnim("resources/images/Kunoichi/Attack_2.png",ATTACK_2,15, 7,0));
     addHeroAnim(&kunoichi,LoadAnim("resources/images/Kunoichi/Jump.png",JUMP,12, 9,0));
-    addHeroAnim(&kunoichi,LoadAnim("resources/images/Kunoichi/Eating.png",EAT,8, 8,0));
+    addHeroAnim(&kunoichi,LoadAnim("resources/images/Kunoichi/Eating.png",EAT,6, 8,0));
     addHeroAnim(&kunoichi,LoadAnim("resources/images/Kunoichi/Dead.png",DEAD,8, 4,0));
     addHeroAnim(&kunoichi,LoadAnim("resources/images/Kunoichi/Hurt.png",HURT,4, 1,0));
 
     // Ship
-    Image imgProj = LoadImage("resources/images/Ship3/Ship3.png");
-    Projectile proj =  loadProjectile(300,380,LoadTextureFromImage(imgProj));
-    proj.velocity.y=0;
+    Hero ship = loadHero();
+    ship.pos.x = 300;
+    ship.pos.y=420;
+    ship.type = SHIP;
+    addHeroAnim(&ship,LoadAnim("resources/images/Ship3/Ship3.png",IDLE,1,0,1));
+    addHeroAnim(&ship,LoadAnim("resources/images/Ship3/Ship3_Explosion.png",DEAD,8,10,0));
 
     // Left button
     Button btnLeft;
@@ -146,12 +149,12 @@ int main(void)
             }
         }
         }
-        //btnHit.isActive = isColliding(btnHit.pos.x,btnHit.pos.y,btnHit.texture.width,btnHit.texture.height,
-                //kunoichi.pos.x+50,kunoichi.pos.y+109,20,20);
+
 
 
         updateHero(&kunoichi,dt);
-        updateProjectile(&proj);
+        updateHero(&ship,dt);
+
 
         //----------------------------------------------------------------------------------
 
@@ -188,12 +191,13 @@ int main(void)
 
         // Hero
         drawHero(kunoichi);
+        drawHero(ship);
 
 
 
 
         // Projectiles
-        drawProjectile(proj);
+
 
         EndDrawing();
         //----------------------------------------------------------------------------------
@@ -203,7 +207,8 @@ int main(void)
     //--------------------------------------------------------------------------------------
 
     unloadHero(kunoichi);
-    unloadProjectile(proj);
+    unloadHero(ship);
+
     UnloadTexture(bgPurple);
     UnloadTexture(bgStarfield);
     UnloadTexture(btnLeft.texture);

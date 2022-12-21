@@ -19,7 +19,8 @@ typedef enum {
 
 typedef enum {
     HERO,
-    HITBOX
+    METEOR,
+    SHIP
 } HeroType;
 
 typedef struct

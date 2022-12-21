@@ -28,8 +28,9 @@ int main(void)
     projectileCount=0;
 
     Hero kunoichi = loadHero();
-    kunoichi.pos.x=100;
+    kunoichi.pos.x=30;
     kunoichi.pos.y=300;
+    kunoichi.type= HERO;
     addHeroAnim(&kunoichi,LoadAnim("resources/images/Kunoichi/Run.png",RUN,8, 7,1));
     addHeroAnim(&kunoichi,LoadAnim("resources/images/Kunoichi/Idle.png",IDLE,8, 8,1));
     addHeroAnim(&kunoichi,LoadAnim("resources/images/Kunoichi/Attack_1.png",ATTACK_1,10, 5,0));
@@ -39,10 +40,16 @@ int main(void)
     addHeroAnim(&kunoichi,LoadAnim("resources/images/Kunoichi/Dead.png",DEAD,8, 4,0));
     addHeroAnim(&kunoichi,LoadAnim("resources/images/Kunoichi/Hurt.png",HURT,4, 1,0));
 
-    //Image imgProj = LoadImage("resources/images/Kunoichi/Spine.png");
-    //Projectile proj =  loadProjectile(10,20,LoadTextureFromImage(imgProj));
-    //proj.velocity.x=2;
+    Image imgProj = LoadImage("resources/images/Ship3/Ship3.png");
+    Projectile proj =  loadProjectile(300,380,LoadTextureFromImage(imgProj));
+    proj.velocity.y=0;
 
+    Hero hitBox = loadHero();
+    hitBox.pos.x=130;
+    hitBox.pos.y=370;
+    hitBox.type = HITBOX;
+    addHeroAnim(&hitBox,LoadAnim("resources/images/Bomb_03.png",IDLE,1,0,0));
+    addHeroAnim(&hitBox,LoadAnim("resources/images/Bomb_02.png",HURT,1,0,0));
 
     //playHeroAnim(&kunoichi,IDLE);
 
@@ -57,7 +64,8 @@ int main(void)
         dt = GetFrameTime();
 
         updateHero(&kunoichi,dt);
-        //updateProjectile(&proj);
+        updateHero(&hitBox,dt);
+        updateProjectile(&proj);
 
         //----------------------------------------------------------------------------------
 
@@ -68,7 +76,8 @@ int main(void)
 
 
         drawHero(kunoichi);
-        //drawProjectile(proj);
+        drawHero(hitBox);
+        drawProjectile(proj);
 
         EndDrawing();
         //----------------------------------------------------------------------------------
@@ -78,7 +87,8 @@ int main(void)
     //--------------------------------------------------------------------------------------
 
     unloadHero(kunoichi);
-//    unloadProjectile(proj);
+    unloadHero(hitBox);
+    unloadProjectile(proj);
 
     CloseWindow(); // Close window and OpenGL context
     //--------------------------------------------------------------------------------------

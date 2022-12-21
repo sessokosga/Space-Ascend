@@ -147,15 +147,6 @@
 			<Option target="Debug (Windows)" />
 			<Option target="Release (Windows)" />
 		</Unit>
-		<Unit filename="linkedList.c">
-			<Option compilerVar="CC" />
-			<Option target="Debug (Windows)" />
-			<Option target="Release (Windows)" />
-		</Unit>
-		<Unit filename="linkedList.h">
-			<Option target="Debug (Windows)" />
-			<Option target="Release (Windows)" />
-		</Unit>
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
 			<Option target="Debug (Windows)" />

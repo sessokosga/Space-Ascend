@@ -17,12 +17,18 @@ typedef enum {
     HURT=7
 } HeroState;
 
+typedef enum {
+    HERO,
+    HITBOX
+} HeroType;
+
 typedef struct
 {
     Vector2 pos, velocity;
     Anim currentAnim;
     int animCount,flipX,flipY;
     HeroState state;
+    HeroType type;
     Anim listAnim [10];
 } Hero;
 

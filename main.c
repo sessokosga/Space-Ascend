@@ -50,13 +50,20 @@ void updateListProjectiles()
             {
                 listProjectiles[i].del = 1;
                 if (listMeteors[m].energy>0)
+                {
                     listMeteors[m].energy-=.5;
-printf("Meteor : %.2f\n",listMeteors[m].energy);
+                    //if (listMeteors[m].energy<=.5){
+                    //  listMeteors[m].pos.x = listMeteors[m].pos.x
+                    //}
+                    //printf("Meteor %d : %.2f\n",m,listMeteors[m].energy);
+                }
+
                 listProjectiles[i].velocity.y=0;
             }
         }
         updateProjectile(&listProjectiles[i]);
-        if((listProjectiles[i].del ==1 && listProjectiles[i].deadAnim.ended==1) || listProjectiles[i].pos.y< -100){
+        if((listProjectiles[i].del ==1 && listProjectiles[i].deadAnim.ended==1) || listProjectiles[i].pos.y< -100)
+        {
             removeProjectile(i);
         }
     }
@@ -111,7 +118,8 @@ void updateMeteors()
     for (int i=meteorsCount-1; i>=0; i--)
     {
         updateHero(&listMeteors[i]);
-        if((listMeteors[i].state==DEAD && listMeteors[i].currentAnim.ended)|| listMeteors[i].pos.y>SCREEN_HEIGHT+20 ){
+        if((listMeteors[i].state==DEAD && listMeteors[i].currentAnim.ended)|| listMeteors[i].pos.y>SCREEN_HEIGHT+20 )
+        {
             deleteMeteor(i);
         }
     }
@@ -243,7 +251,7 @@ int main(void)
     Anim dead = LoadAnim("resources/images/Meteors/explosion.png",DEAD,20,10,0);
 
     float x=0,y=0;
-    for (int i=0; i<10; i++)
+    for (int i=0; i<14; i++)
     {
         x = 170 + 50*i;
         y=80;
@@ -269,63 +277,72 @@ int main(void)
         // Update
         //----------------------------------------------------------------------------------
         dt = GetFrameTime();
-        timeElapsed+=dt;
+        if (kunoichi.state!= DEAD )
+        {
+            timeElapsed+=dt;
 
 //        printf("Meteors : %d, Projectiles : %d\n",meteorsCount,projectilesCount);
 
-        // Left button
-        btnLeft.isActive = isColliding(btnLeft.pos.x,btnLeft.pos.y,btnLeft.texture.width,btnLeft.texture.height,
-                                       kunoichi.pos.x+60,kunoichi.pos.y+109,20,20);
-        if(btnLeft.isActive==1)
-        {
-            ship.velocity.x=-1;
-        }
-
-        // Right button
-        btnRight.isActive = isColliding(btnRight.pos.x,btnRight.pos.y,btnRight.texture.width,btnRight.texture.height,
-                                        kunoichi.pos.x+50,kunoichi.pos.y+109,20,20);
-        if (btnRight.isActive==1)
-        {
-            ship.velocity.x=1;
-        }
-
-        if (btnRight.isActive==0 && btnLeft.isActive==0)
-            ship.velocity.x=0;
-
-        // Hit button
-        if (kunoichi.pos.x>=-12 && kunoichi.flipX==1)
-        {
-            if (kunoichi.state == ATTACK_1)
+            // Left button
+            btnLeft.isActive = isColliding(btnLeft.pos.x,btnLeft.pos.y,btnLeft.texture.width,btnLeft.texture.height,
+                                           kunoichi.pos.x+60,kunoichi.pos.y+109,20,20);
+            if(btnLeft.isActive==1)
             {
-                if (kunoichi.currentAnim.currentFrame == 3 )
+                ship.velocity.x=-1;
+            }
+
+            // Right button
+            btnRight.isActive = isColliding(btnRight.pos.x,btnRight.pos.y,btnRight.texture.width,btnRight.texture.height,
+                                            kunoichi.pos.x+50,kunoichi.pos.y+109,20,20);
+            if (btnRight.isActive==1)
+            {
+                ship.velocity.x=1;
+            }
+
+            if (btnRight.isActive==0 && btnLeft.isActive==0)
+                ship.velocity.x=0;
+
+            // Hit button
+            if (kunoichi.pos.x>=-12 && kunoichi.flipX==1)
+            {
+                if (kunoichi.state == ATTACK_1)
                 {
-                    btnHit.isActive=1;
-                    ship.velocity.y=-1;
-                    ship.isEngineOn = 1;
-                    engineTimer=0;
+                    if (kunoichi.currentAnim.currentFrame == 3 )
+                    {
+                        btnHit.isActive=1;
+                        ship.velocity.y=-1;
+                        ship.isEngineOn = 1;
+                        engineTimer=0;
+                    }
+                    else
+                    {
+                        btnHit.isActive=0;
+                    }
                 }
-                else
+                if (kunoichi.state == ATTACK_2)
                 {
-                    btnHit.isActive=0;
+                    if (kunoichi.currentAnim.currentFrame == 5 && btnHit.isActive==0 )
+                    {
+                        btnHit.isActive=1;
+                        addProjetile(ship.pos.x+28,ship.pos.y-20,-4);
+                    }
+                    else
+                    {
+                        btnHit.isActive=0;
+                    }
                 }
             }
-            if (kunoichi.state == ATTACK_2)
-            {
-                if (kunoichi.currentAnim.currentFrame == 5 && btnHit.isActive==0 )
-                {
-                    btnHit.isActive=1;
-                    addProjetile(ship.pos.x+28,ship.pos.y-20,-4);
-                }
-                else
-                {
-                    btnHit.isActive=0;
-                }
-            }
+            // Meteors
+            updateMeteors();
         }
 
-
-
+        // Hero
         updateHero(&kunoichi);
+        if (ship.pos.y>SCREEN_HEIGHT)
+        {
+            kunoichi.energy=0;
+            printf("Dead : %d, Kuno : %d\n",DEAD,kunoichi.state);
+        }
 
         // Ship
         if (ship.isEngineOn)
@@ -334,14 +351,10 @@ int main(void)
         {
             ship.isEngineOn = 0;
         }
-
         updateHero(&ship);
         shipEngine.pos.x = ship.pos.x+23;
         shipEngine.pos.y = ship.pos.y+64;
         updateAnim(&shipEngine);
-
-        // Meteors
-        updateMeteors();
 
         // Projectiles
         updateListProjectiles();
@@ -391,6 +404,8 @@ int main(void)
         drawHero(ship);
         if(ship.isEngineOn==1)
             drawAnim(shipEngine);
+
+        //printf("Ship y : %.2f\n",ship.pos.y);
 
         // Projectiles
 

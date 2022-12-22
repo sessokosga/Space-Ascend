@@ -140,7 +140,13 @@ void updateHero(Hero *pHero)
 
             if (pHero->velocity.y<2)
                 pHero->velocity.y+=0.008;
-            //pHero->pos.y+=pHero->velocity.y;
+            pHero->pos.y+=pHero->velocity.y;
+
+
+
+            if(pHero->pos.y > SCREEN_HEIGHT){
+                pHero->energy=0;
+            }
         }
 
         // Meteor

@@ -27,7 +27,7 @@ typedef struct
 {
     Vector2 pos, velocity;
     Anim currentAnim;
-    int animCount,flipX,flipY;
+    int animCount,flipX,flipY,isEngineOn;
     HeroState state;
     HeroType type;
     Anim listAnim [10];

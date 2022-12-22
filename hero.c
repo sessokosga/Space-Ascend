@@ -13,6 +13,7 @@ Hero loadHero()
     hero.state = IDLE;
     hero.flipX=1;
     hero.flipY=1;
+    hero.isEngineOn=0;
     return hero;
 }
 
@@ -118,7 +119,7 @@ void updateHero(Hero *pHero, float dt)
             pHero->pos.y+=pHero->velocity.y;
 
         }
-        printf("x: %lf\n",pHero->pos.x);
+
         if(pHero->type==SHIP)
         {
             if(pHero->pos.x+55 > SCREEN_WIDTH)
@@ -136,7 +137,8 @@ void updateHero(Hero *pHero, float dt)
             if(!(res+55>SCREEN_WIDTH || res<138))
                 pHero->pos.x = res;
 
-
+            if (pHero->velocity.y<2)
+                pHero->velocity.y+=0.009;
             pHero->pos.y+=pHero->velocity.y;
         }
 

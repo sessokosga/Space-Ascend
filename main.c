@@ -34,7 +34,7 @@ int main(void)
     //--------------------------------------------------------------------------------------
     const int screenWidth = SCREEN_WIDTH;
     const int screenHeight = SCREEN_HEIGHT;
-    float dt;
+    float dt,engineTimer=0;
 
     InitWindow(screenWidth, screenHeight, GAME_TITLE);
 
@@ -66,10 +66,13 @@ int main(void)
     // Ship
     Hero ship = loadHero();
     ship.pos.x = 300;
-    ship.pos.y=SCREEN_HEIGHT-92;
+    ship.pos.y=SCREEN_HEIGHT-200;
     ship.type = SHIP;
     addHeroAnim(&ship,LoadAnim("resources/images/Ship3/Ship3.png",IDLE,1,0,1));
     addHeroAnim(&ship,LoadAnim("resources/images/Ship3/Ship3_Explosion.png",DEAD,8,10,0));
+
+    // Ship engine
+    Anim shipEngine = LoadAnim("resources/images/Ship3/Exhaust/exhaust1.png",IDLE,8,3,1);
 
     // Left button
     Button btnLeft;
@@ -125,15 +128,17 @@ int main(void)
 
         // Left button
         btnLeft.isActive = isColliding(btnLeft.pos.x,btnLeft.pos.y,btnLeft.texture.width,btnLeft.texture.height,
-                kunoichi.pos.x+60,kunoichi.pos.y+109,20,20);
-        if(btnLeft.isActive==1){
+                                       kunoichi.pos.x+60,kunoichi.pos.y+109,20,20);
+        if(btnLeft.isActive==1)
+        {
             ship.velocity.x=-3;
         }
 
         // Right button
         btnRight.isActive = isColliding(btnRight.pos.x,btnRight.pos.y,btnRight.texture.width,btnRight.texture.height,
-                kunoichi.pos.x+50,kunoichi.pos.y+109,20,20);
-        if (btnRight.isActive==1){
+                                        kunoichi.pos.x+50,kunoichi.pos.y+109,20,20);
+        if (btnRight.isActive==1)
+        {
             ship.velocity.x=3;
         }
 
@@ -144,28 +149,51 @@ int main(void)
         //printf("Ship x: %lf\n",ship.pos.x+ship.currentAnim.frameRec.width);
 
         // Hit button
-        if (kunoichi.pos.x>=0){
-        if (kunoichi.state == ATTACK_1){
-            if (kunoichi.currentAnim.currentFrame == 3 ){
-                btnHit.isActive=1;
-                ship.velocity.y=-1;
-            }else{
+        if (kunoichi.pos.x>=0)
+        {
+            if (kunoichi.state == ATTACK_1)
+            {
+                if (kunoichi.currentAnim.currentFrame == 3 )
+                {
+                    btnHit.isActive=1;
+                    ship.velocity.y=-1.5;
+                    ship.isEngineOn = 1;
+                    engineTimer=0;
+                }
+                else
+                {
                     btnHit.isActive=0;
+                }
             }
-        }
-        if (kunoichi.state == ATTACK_2){
-            if (kunoichi.currentAnim.currentFrame == 5 ){
-                btnHit.isActive=1;
-            }else{
+            if (kunoichi.state == ATTACK_2)
+            {
+                if (kunoichi.currentAnim.currentFrame == 5 )
+                {
+                    btnHit.isActive=1;
+                }
+                else
+                {
                     btnHit.isActive=0;
+                }
             }
-        }
         }
 
 
 
         updateHero(&kunoichi,dt);
+
+        // Ship
+        if (ship.isEngineOn)
+            engineTimer+=dt;
+        if (engineTimer>=.6)
+        {
+            ship.isEngineOn = 0;
+        }
+        printf("Engine timer : %lf\n",engineTimer);
         updateHero(&ship,dt);
+        shipEngine.pos.x = ship.pos.x+23;
+        shipEngine.pos.y = ship.pos.y+64;
+        updateAnim(&shipEngine);
 
 
         //----------------------------------------------------------------------------------
@@ -204,6 +232,8 @@ int main(void)
         // Hero
         drawHero(kunoichi);
         drawHero(ship);
+        if(ship.isEngineOn==1)
+            drawAnim(shipEngine);
 
 
 
@@ -220,6 +250,7 @@ int main(void)
 
     unloadHero(kunoichi);
     unloadHero(ship);
+    unloadAnim(shipEngine);
 
     UnloadTexture(bgPurple);
     UnloadTexture(bgStarfield);

@@ -139,7 +139,7 @@ void updateHero(Hero *pHero)
                 pHero->pos.x = res;
 
             if (pHero->velocity.y<2)
-                pHero->velocity.y+=0.02;
+                pHero->velocity.y+=0.008;
             pHero->pos.y+=pHero->velocity.y;
         }
 

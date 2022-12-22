@@ -3,7 +3,7 @@
 #include "hero.h"
 #include "projectile.h"
 #include "constants.h"
-#include <math.h>
+#include <time.h>
 
 
 
@@ -49,27 +49,35 @@ void addMeteor(float pX, float pY, float pVx, float pVy, int pEnergy, Anim pIdle
     }
 }
 
-void updateMeteors(){
-    for (int i=0; i<meteorsCount; i++){
+void updateMeteors()
+{
+    for (int i=0; i<meteorsCount; i++)
+    {
         updateHero(&listMeteors[i]);
     }
 }
 
-void drawMeteors(){
-    for (int i=0; i<meteorsCount; i++){
+void drawMeteors()
+{
+    for (int i=0; i<meteorsCount; i++)
+    {
         drawHero(listMeteors[i]);
     }
 }
 
-void unloadMeteors(){
-    for (int i=0; i<meteorsCount; i++){
+void unloadMeteors()
+{
+    for (int i=0; i<meteorsCount; i++)
+    {
         unloadHero(listMeteors[i]);
     }
 }
 
-void deleteMeteor(int num){
+void deleteMeteor(int num)
+{
     unloadHero(listMeteors[num]);
-    for (int i=num; i<meteorsCount-1; i++){
+    for (int i=num; i<meteorsCount-1; i++)
+    {
         listMeteors[i]=listMeteors[i+1];
     }
 }
@@ -151,7 +159,7 @@ int main(void)
     btnHit.texture = LoadTextureFromImage(imgHit);
     Image imgHitAct = LoadImage("resources/images/BtnHit/Bomb_02.png");
     btnHit.textureActive = LoadTextureFromImage(imgHitAct);
-    btnHit.pos.x=120;
+    btnHit.pos.x=110;
     btnHit.pos.y=SCREEN_HEIGHT-82;
     btnHit.isActive=0;
     UnloadImage(imgHit);
@@ -160,15 +168,31 @@ int main(void)
     // Meteors
     meteorsCount=0;
 
-    for (int i=0; i<10; i++){
-    addMeteor(170+90*i,80+50*i,0,.6,5,LoadAnim("resources/images/Meteors/Meteor_01.png",IDLE,1,0,1),
-              LoadAnim("resources/images/Meteors/explosion.png",DEAD,20,10,0));
-    }
-    addMeteor(160+10,80,0,.6,5,LoadAnim("resources/images/Meteors/Meteor_01.png",IDLE,1,0,1),
-              LoadAnim("resources/images/Meteors/explosion.png",DEAD,8,10,0));
-    addMeteor(160+100,80,0,.5,5,LoadAnim("resources/images/Meteors/Meteor_02.png",IDLE,1,0,1),
-              LoadAnim("resources/images/Meteors/explosion.png",DEAD,8,10,0));
+    char *idle[10];
+    idle[0] = "resources/images/Meteors/Meteor_01.png";
+    idle[1] = "resources/images/Meteors/Meteor_02.png";
+    idle[2] = "resources/images/Meteors/Meteor_03.png";
+    idle[3] = "resources/images/Meteors/Meteor_04.png";
+    idle[4] = "resources/images/Meteors/Meteor_05.png";
+    idle[5] = "resources/images/Meteors/Meteor_06.png";
+    idle[6] = "resources/images/Meteors/Meteor_07.png";
+    idle[7] = "resources/images/Meteors/Meteor_08.png";
+    idle[8] = "resources/images/Meteors/Meteor_09.png";
+    idle[9] = "resources/images/Meteors/Meteor_10.png";
 
+    float x=0,y=0;
+    for (int i=0; i<10; i++)
+    {
+        x = 170 + 50*i;
+        y=80;
+        if (x>=SCREEN_WIDTH){
+           x=x-SCREEN_WIDTH+170;
+           y+=60;
+        }
+
+        addMeteor(x,y,0,.1,5,LoadAnim(idle[rand()%10],IDLE,1,0,1),
+                  LoadAnim("resources/images/Meteors/explosion.png",DEAD,20,10,0));
+    }
 
 
     SetTargetFPS(60); // Set our game to run at 60 frames-per-second
@@ -187,7 +211,7 @@ int main(void)
                                        kunoichi.pos.x+60,kunoichi.pos.y+109,20,20);
         if(btnLeft.isActive==1)
         {
-            ship.velocity.x=-1.5;
+            ship.velocity.x=-1;
         }
 
         // Right button
@@ -195,24 +219,21 @@ int main(void)
                                         kunoichi.pos.x+50,kunoichi.pos.y+109,20,20);
         if (btnRight.isActive==1)
         {
-            ship.velocity.x=1.5;
+            ship.velocity.x=1;
         }
 
         if (btnRight.isActive==0 && btnLeft.isActive==0)
             ship.velocity.x=0;
 
-
-        //printf("Ship x: %lf\n",ship.pos.x+ship.currentAnim.frameRec.width);
-
         // Hit button
-        if (kunoichi.pos.x>=-4)
+        if (kunoichi.pos.x>=-12)
         {
             if (kunoichi.state == ATTACK_1)
             {
                 if (kunoichi.currentAnim.currentFrame == 3 )
                 {
                     btnHit.isActive=1;
-                    ship.velocity.y=-1.5;
+                    ship.velocity.y=-1;
                     ship.isEngineOn = 1;
                     engineTimer=0;
                 }
@@ -241,7 +262,7 @@ int main(void)
         // Ship
         if (ship.isEngineOn)
             engineTimer+=dt;
-        if (engineTimer>=.6)
+        if (engineTimer>=.4)
         {
             ship.isEngineOn = 0;
         }

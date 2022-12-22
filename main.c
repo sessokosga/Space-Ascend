@@ -38,9 +38,27 @@ void addProjetile(float pX,float pY,float pVy)
 
 void updateListProjectiles()
 {
-    for(int i=0; i<projectilesCount; i++)
+    for(int i=projectilesCount-1; i>=0; i--)
     {
+        for(int m=meteorsCount-1; m>=0; m--)
+        {
+            if (listProjectiles[i].del==0 &&
+                    isColliding(listProjectiles[i].pos.x, listProjectiles[i].pos.y, listProjectiles[i].idleAnim.frameRec.width/1.5,
+                                listProjectiles[i].idleAnim.frameRec.height,
+                                listMeteors[m].pos.x,listMeteors[m].pos.y,listMeteors[m].currentAnim.frameRec.width/1.5,
+                                listMeteors[m].currentAnim.frameRec.height/8))
+            {
+                listProjectiles[i].del = 1;
+                if (listMeteors[m].energy>0)
+                    listMeteors[m].energy-=.5;
+printf("Meteor : %.2f\n",listMeteors[m].energy);
+                listProjectiles[i].velocity.y=0;
+            }
+        }
         updateProjectile(&listProjectiles[i]);
+        if((listProjectiles[i].del ==1 && listProjectiles[i].deadAnim.ended==1) || listProjectiles[i].pos.y< -100){
+            removeProjectile(i);
+        }
     }
 }
 
@@ -52,9 +70,13 @@ void drawListProjectiles()
     }
 }
 
-void removeProjectile()
+void removeProjectile(int num)
 {
-
+    for (int i=num; i<projectilesCount-1; i++)
+    {
+        listProjectiles[i] = listProjectiles[i+1];
+    }
+    projectilesCount--;
 }
 
 void unloadListProjectiles()
@@ -70,7 +92,6 @@ void addMeteor(float pX, float pY, float pVx, float pVy, int pEnergy, Anim pIdle
 {
     if (meteorsCount<MAX_METEORS)
     {
-
         listMeteors[meteorsCount] = loadHero();
         listMeteors[meteorsCount].pos.x = pX;
         listMeteors[meteorsCount].type = METEOR;
@@ -87,9 +108,12 @@ void addMeteor(float pX, float pY, float pVx, float pVy, int pEnergy, Anim pIdle
 
 void updateMeteors()
 {
-    for (int i=0; i<meteorsCount; i++)
+    for (int i=meteorsCount-1; i>=0; i--)
     {
         updateHero(&listMeteors[i]);
+        if((listMeteors[i].state==DEAD && listMeteors[i].currentAnim.ended)|| listMeteors[i].pos.y>SCREEN_HEIGHT+20 ){
+            deleteMeteor(i);
+        }
     }
 }
 
@@ -111,11 +135,11 @@ void unloadMeteors()
 
 void deleteMeteor(int num)
 {
-    unloadHero(listMeteors[num]);
     for (int i=num; i<meteorsCount-1; i++)
     {
         listMeteors[i]=listMeteors[i+1];
     }
+    meteorsCount--;
 }
 
 int main(void)
@@ -216,6 +240,8 @@ int main(void)
     idle[8] = LoadAnim("resources/images/Meteors/Meteor_09.png",IDLE,1,0,1);
     idle[9] = LoadAnim("resources/images/Meteors/Meteor_10.png",IDLE,1,0,1);
 
+    Anim dead = LoadAnim("resources/images/Meteors/explosion.png",DEAD,20,10,0);
+
     float x=0,y=0;
     for (int i=0; i<10; i++)
     {
@@ -227,8 +253,7 @@ int main(void)
             y+=60;
         }
 
-        addMeteor(x,y,0,.1,5,idle[rand()%10],
-                  LoadAnim("resources/images/Meteors/explosion.png",DEAD,20,10,0));
+        addMeteor(x,y,0,.1,5,idle[rand()%10],dead);
     }
 
     // Projectiles
@@ -245,6 +270,8 @@ int main(void)
         //----------------------------------------------------------------------------------
         dt = GetFrameTime();
         timeElapsed+=dt;
+
+//        printf("Meteors : %d, Projectiles : %d\n",meteorsCount,projectilesCount);
 
         // Left button
         btnLeft.isActive = isColliding(btnLeft.pos.x,btnLeft.pos.y,btnLeft.texture.width,btnLeft.texture.height,
@@ -266,7 +293,7 @@ int main(void)
             ship.velocity.x=0;
 
         // Hit button
-        if (kunoichi.pos.x>=-12)
+        if (kunoichi.pos.x>=-12 && kunoichi.flipX==1)
         {
             if (kunoichi.state == ATTACK_1)
             {
@@ -284,10 +311,10 @@ int main(void)
             }
             if (kunoichi.state == ATTACK_2)
             {
-                if (kunoichi.currentAnim.currentFrame == 5 )
+                if (kunoichi.currentAnim.currentFrame == 5 && btnHit.isActive==0 )
                 {
                     btnHit.isActive=1;
-                    addProjetile(ship.pos.x+28,ship.pos.y-20,-2);
+                    addProjetile(ship.pos.x+28,ship.pos.y-20,-4);
                 }
                 else
                 {

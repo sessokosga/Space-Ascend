@@ -157,6 +157,12 @@ void updateHero(Hero *pHero)
         {
             pHero->state = IDLE;
         }
+
+        if(pHero->energy<=0){
+            pHero->state = DEAD;
+        }
+
+
         switch(pHero->state)
         {
         case RUN:

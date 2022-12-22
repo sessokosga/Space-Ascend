@@ -19,15 +19,51 @@ typedef struct Button
     int isActive;
 } Button;
 
-int projectileCount, meteorsCount;
+int projectilesCount, meteorsCount;
+Anim animIdle, animDead;
+
 
 Projectile listProjectiles[MAX_PROJECTILES];
 Hero listMeteors[MAX_METEORS];
 
-void addProjetile(Image pImg,float pX,float pY)
+void addProjetile(float pX,float pY,float pVy)
 {
-    if(projectileCount<MAX_PROJECTILES)
-        listProjectiles[projectileCount++]= loadProjectile(pX,pY,LoadTextureFromImage(pImg));
+    if(projectilesCount<MAX_PROJECTILES)
+    {
+        listProjectiles[projectilesCount]= loadProjectile(pX,pY,animIdle,animDead);
+        listProjectiles[projectilesCount].velocity.y=pVy;
+        projectilesCount++;
+    }
+}
+
+void updateListProjectiles()
+{
+    for(int i=0; i<projectilesCount; i++)
+    {
+        updateProjectile(&listProjectiles[i]);
+    }
+}
+
+void drawListProjectiles()
+{
+    for(int i=0; i<projectilesCount; i++)
+    {
+        drawProjectile(listProjectiles[i]);
+    }
+}
+
+void removeProjectile()
+{
+
+}
+
+void unloadListProjectiles()
+{
+    for(int i=0; i<projectilesCount; i++)
+    {
+        unloadProjectile(listProjectiles[i]);
+    }
+
 }
 
 void addMeteor(float pX, float pY, float pVx, float pVy, int pEnergy, Anim pIdle, Anim pExplosion)
@@ -93,7 +129,7 @@ int main(void)
 
     InitWindow(screenWidth, screenHeight, GAME_TITLE);
 
-    projectileCount=0;
+    projectilesCount=0;
 
     // Background
     Image imgPurple = LoadImage("resources/images/Background/Purple Nebula 7.png");
@@ -168,32 +204,36 @@ int main(void)
     // Meteors
     meteorsCount=0;
 
-    char *idle[10];
-    idle[0] = "resources/images/Meteors/Meteor_01.png";
-    idle[1] = "resources/images/Meteors/Meteor_02.png";
-    idle[2] = "resources/images/Meteors/Meteor_03.png";
-    idle[3] = "resources/images/Meteors/Meteor_04.png";
-    idle[4] = "resources/images/Meteors/Meteor_05.png";
-    idle[5] = "resources/images/Meteors/Meteor_06.png";
-    idle[6] = "resources/images/Meteors/Meteor_07.png";
-    idle[7] = "resources/images/Meteors/Meteor_08.png";
-    idle[8] = "resources/images/Meteors/Meteor_09.png";
-    idle[9] = "resources/images/Meteors/Meteor_10.png";
+    Anim idle[10];
+    idle[0] = LoadAnim("resources/images/Meteors/Meteor_01.png",IDLE,1,0,1);
+    idle[1] = LoadAnim("resources/images/Meteors/Meteor_02.png",IDLE,1,0,1);
+    idle[2] = LoadAnim("resources/images/Meteors/Meteor_03.png",IDLE,1,0,1);
+    idle[3] = LoadAnim("resources/images/Meteors/Meteor_04.png",IDLE,1,0,1);
+    idle[4] = LoadAnim("resources/images/Meteors/Meteor_05.png",IDLE,1,0,1);
+    idle[5] = LoadAnim("resources/images/Meteors/Meteor_06.png",IDLE,1,0,1);
+    idle[6] = LoadAnim("resources/images/Meteors/Meteor_07.png",IDLE,1,0,1);
+    idle[7] = LoadAnim("resources/images/Meteors/Meteor_08.png",IDLE,1,0,1);
+    idle[8] = LoadAnim("resources/images/Meteors/Meteor_09.png",IDLE,1,0,1);
+    idle[9] = LoadAnim("resources/images/Meteors/Meteor_10.png",IDLE,1,0,1);
 
     float x=0,y=0;
     for (int i=0; i<10; i++)
     {
         x = 170 + 50*i;
         y=80;
-        if (x>=SCREEN_WIDTH){
-           x=x-SCREEN_WIDTH+170;
-           y+=60;
+        if (x>=SCREEN_WIDTH)
+        {
+            x=x-SCREEN_WIDTH+170;
+            y+=60;
         }
 
-        addMeteor(x,y,0,.1,5,LoadAnim(idle[rand()%10],IDLE,1,0,1),
+        addMeteor(x,y,0,.1,5,idle[rand()%10],
                   LoadAnim("resources/images/Meteors/explosion.png",DEAD,20,10,0));
     }
 
+    // Projectiles
+    animIdle= LoadAnim("resources/images/Ship3/Shot3/idle.png",IDLE,5,2,0);
+    animDead = LoadAnim("resources/images/Ship3/Shot3/explode.png",DEAD,7,3,0);
 
     SetTargetFPS(60); // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
@@ -247,6 +287,7 @@ int main(void)
                 if (kunoichi.currentAnim.currentFrame == 5 )
                 {
                     btnHit.isActive=1;
+                    addProjetile(ship.pos.x+28,ship.pos.y-20,-2);
                 }
                 else
                 {
@@ -274,7 +315,9 @@ int main(void)
 
         // Meteors
         updateMeteors();
-        printf("Kunoichi x : %f\n",kunoichi.pos.x);
+
+        // Projectiles
+        updateListProjectiles();
 
 
         //----------------------------------------------------------------------------------
@@ -326,6 +369,9 @@ int main(void)
 
         // Meteors
         drawMeteors();
+
+        // Projectiles
+        drawListProjectiles();
 
         EndDrawing();
         //----------------------------------------------------------------------------------

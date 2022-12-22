@@ -2,16 +2,16 @@
 #define PROJECTILE_H_INCLUDED
 
 #include "raylib.h"
+#include "anim.h"
 
 typedef struct {
-
-    Texture texture;
+    Anim deadAnim;
+    Anim idleAnim;
     Vector2 pos,velocity;
     int del;
-    struct Projectile* next;
 } Projectile;
 
-Projectile loadProjectile(int pX,int pY, Texture pTexture);
+Projectile loadProjectile(int pX,int pY, Anim pIdleAnim, Anim pDeadAnim);
 void updateProjectile(Projectile *pProj);
 void drawProjectile(Projectile pProj);
 void unloadProjectile(Projectile pProj);

@@ -3,6 +3,9 @@
 #include "hero.h"
 #include "projectile.h"
 #include "constants.h"
+#include <math.h>
+
+
 
 int isColliding( float x1, float y1, float w1,float h1,float x2, float y2,float w2,float h2)
 {
@@ -16,17 +19,60 @@ typedef struct Button
     int isActive;
 } Button;
 
-int projectileCount;
+int projectileCount, meteorsCount;
 
-Projectile listProjectiles[MAX_PROJECTILE];
+Projectile listProjectiles[MAX_PROJECTILES];
+Hero listMeteors[MAX_METEORS];
 
 void addProjetile(Image pImg,float pX,float pY)
 {
-
-    listProjectiles[projectileCount++]= loadProjectile(pX,pY,LoadTextureFromImage(pImg));
+    if(projectileCount<MAX_PROJECTILES)
+        listProjectiles[projectileCount++]= loadProjectile(pX,pY,LoadTextureFromImage(pImg));
 }
 
+void addMeteor(float pX, float pY, float pVx, float pVy, int pEnergy, Anim pIdle, Anim pExplosion)
+{
+    if (meteorsCount<MAX_METEORS)
+    {
 
+        listMeteors[meteorsCount] = loadHero();
+        listMeteors[meteorsCount].pos.x = pX;
+        listMeteors[meteorsCount].type = METEOR;
+        listMeteors[meteorsCount].pos.y = pY;
+        listMeteors[meteorsCount].velocity.x = pVx;
+        listMeteors[meteorsCount].velocity.y = pVy;
+        listMeteors[meteorsCount].energy=pEnergy;
+        addHeroAnim(&listMeteors[meteorsCount],pIdle);
+        addHeroAnim(&listMeteors[meteorsCount],pExplosion);
+        meteorsCount++;
+
+    }
+}
+
+void updateMeteors(){
+    for (int i=0; i<meteorsCount; i++){
+        updateHero(&listMeteors[i]);
+    }
+}
+
+void drawMeteors(){
+    for (int i=0; i<meteorsCount; i++){
+        drawHero(listMeteors[i]);
+    }
+}
+
+void unloadMeteors(){
+    for (int i=0; i<meteorsCount; i++){
+        unloadHero(listMeteors[i]);
+    }
+}
+
+void deleteMeteor(int num){
+    unloadHero(listMeteors[num]);
+    for (int i=num; i<meteorsCount-1; i++){
+        listMeteors[i]=listMeteors[i+1];
+    }
+}
 
 int main(void)
 {
@@ -34,7 +80,8 @@ int main(void)
     //--------------------------------------------------------------------------------------
     const int screenWidth = SCREEN_WIDTH;
     const int screenHeight = SCREEN_HEIGHT;
-    float dt,engineTimer=0;
+    float dt,engineTimer=0,timeElapsed=0;
+    char timeText[50]="";
 
     InitWindow(screenWidth, screenHeight, GAME_TITLE);
 
@@ -80,7 +127,7 @@ int main(void)
     btnLeft.texture = LoadTextureFromImage(imgLeft);
     Image imgLeftAct = LoadImage("resources/images/Btn_Active/Backward_BTN.png");
     btnLeft.textureActive = LoadTextureFromImage(imgLeftAct);
-    btnLeft.pos.x=10;
+    btnLeft.pos.x=15;
     btnLeft.pos.y=SCREEN_HEIGHT-52;
     btnLeft.isActive=0;
     UnloadImage(imgLeft);
@@ -98,8 +145,6 @@ int main(void)
     UnloadImage(imgRight);
     UnloadImage(imgRightAct);
 
-
-
     // Box
     Button btnHit;
     Image imgHit = LoadImage("resources/images/BtnHit/Bomb_03.png");
@@ -112,9 +157,19 @@ int main(void)
     UnloadImage(imgHit);
     UnloadImage(imgHitAct);
 
+    // Meteors
+    meteorsCount=0;
+
+    for (int i=0; i<10; i++){
+    addMeteor(170+90*i,80+50*i,0,.6,5,LoadAnim("resources/images/Meteors/Meteor_01.png",IDLE,1,0,1),
+              LoadAnim("resources/images/Meteors/explosion.png",DEAD,20,10,0));
+    }
+    addMeteor(160+10,80,0,.6,5,LoadAnim("resources/images/Meteors/Meteor_01.png",IDLE,1,0,1),
+              LoadAnim("resources/images/Meteors/explosion.png",DEAD,8,10,0));
+    addMeteor(160+100,80,0,.5,5,LoadAnim("resources/images/Meteors/Meteor_02.png",IDLE,1,0,1),
+              LoadAnim("resources/images/Meteors/explosion.png",DEAD,8,10,0));
 
 
-    //playHeroAnim(&kunoichi,IDLE);
 
     SetTargetFPS(60); // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
@@ -125,13 +180,14 @@ int main(void)
         // Update
         //----------------------------------------------------------------------------------
         dt = GetFrameTime();
+        timeElapsed+=dt;
 
         // Left button
         btnLeft.isActive = isColliding(btnLeft.pos.x,btnLeft.pos.y,btnLeft.texture.width,btnLeft.texture.height,
                                        kunoichi.pos.x+60,kunoichi.pos.y+109,20,20);
         if(btnLeft.isActive==1)
         {
-            ship.velocity.x=-3;
+            ship.velocity.x=-1.5;
         }
 
         // Right button
@@ -139,7 +195,7 @@ int main(void)
                                         kunoichi.pos.x+50,kunoichi.pos.y+109,20,20);
         if (btnRight.isActive==1)
         {
-            ship.velocity.x=3;
+            ship.velocity.x=1.5;
         }
 
         if (btnRight.isActive==0 && btnLeft.isActive==0)
@@ -149,7 +205,7 @@ int main(void)
         //printf("Ship x: %lf\n",ship.pos.x+ship.currentAnim.frameRec.width);
 
         // Hit button
-        if (kunoichi.pos.x>=0)
+        if (kunoichi.pos.x>=-4)
         {
             if (kunoichi.state == ATTACK_1)
             {
@@ -180,7 +236,7 @@ int main(void)
 
 
 
-        updateHero(&kunoichi,dt);
+        updateHero(&kunoichi);
 
         // Ship
         if (ship.isEngineOn)
@@ -189,11 +245,15 @@ int main(void)
         {
             ship.isEngineOn = 0;
         }
-        printf("Engine timer : %lf\n",engineTimer);
-        updateHero(&ship,dt);
+
+        updateHero(&ship);
         shipEngine.pos.x = ship.pos.x+23;
         shipEngine.pos.y = ship.pos.y+64;
         updateAnim(&shipEngine);
+
+        // Meteors
+        updateMeteors();
+        printf("Kunoichi x : %f\n",kunoichi.pos.x);
 
 
         //----------------------------------------------------------------------------------
@@ -208,6 +268,12 @@ int main(void)
             DrawTexture(bgStarfield,0,0,WHITE);
         else
             DrawTexture(bgPurple,0,0,WHITE);
+
+        // Time elapsed
+        DrawText("Time elapsed : ",13,60,20,WHITE);
+
+        sprintf(&timeText,"%.0f s",  timeElapsed);
+        DrawText(timeText,60,100,20,WHITE);
 
         // Left button
         if (btnLeft.isActive==0)
@@ -235,11 +301,10 @@ int main(void)
         if(ship.isEngineOn==1)
             drawAnim(shipEngine);
 
-
-
-
         // Projectiles
 
+        // Meteors
+        drawMeteors();
 
         EndDrawing();
         //----------------------------------------------------------------------------------
@@ -260,6 +325,7 @@ int main(void)
     UnloadTexture(btnRight.textureActive);
     UnloadTexture(btnHit.texture);
     UnloadTexture(btnHit.textureActive);
+    unloadMeteors();
 
 
     CloseWindow(); // Close window and OpenGL context

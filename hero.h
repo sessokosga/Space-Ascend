@@ -27,7 +27,7 @@ typedef struct
 {
     Vector2 pos, velocity;
     Anim currentAnim;
-    int animCount,flipX,flipY,isEngineOn;
+    int animCount,flipX,flipY,isEngineOn,energy;
     HeroState state;
     HeroType type;
     Anim listAnim [10];
@@ -38,7 +38,7 @@ typedef struct
 Hero loadHero();
 void addHeroAnim(Hero* pHero, Anim pAnim);
 void playHeroAnim(Hero *pHero,const HeroState pId);
-void updateHero(Hero *pHero, float dt);
+void updateHero(Hero *pHero);
 void drawHero(Hero pHero);
 void unloadHero(Hero pHero);
 

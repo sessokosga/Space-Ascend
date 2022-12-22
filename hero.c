@@ -41,12 +41,12 @@ void playHeroAnim(Hero *pHero, const HeroState pId)
         }
         if(found==0)
         {
-            printf("The animation %d is not found\n",pId);
+            printf("Type : %d, The animation %d is not found\n",pHero->type,pId);
         }
     }
 }
 
-void updateHero(Hero *pHero, float dt)
+void updateHero(Hero *pHero)
 {
     if (pHero->state != DEAD)
     {
@@ -120,6 +120,7 @@ void updateHero(Hero *pHero, float dt)
 
         }
 
+        // Ship
         if(pHero->type==SHIP)
         {
             if(pHero->pos.x+55 > SCREEN_WIDTH)
@@ -138,10 +139,15 @@ void updateHero(Hero *pHero, float dt)
                 pHero->pos.x = res;
 
             if (pHero->velocity.y<2)
-                pHero->velocity.y+=0.009;
+                pHero->velocity.y+=0.02;
             pHero->pos.y+=pHero->velocity.y;
         }
 
+        // Meteor
+        if(pHero->type==METEOR){
+            pHero->pos.x+=pHero->velocity.x;
+            pHero->pos.y+=pHero->velocity.y;
+        }
 
 
 

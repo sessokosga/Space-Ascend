@@ -18,29 +18,30 @@ I thought I would finally make it in this jam, but I've not mastered Raylib enou
 
 ### Language : C
 
-### Framework : Rylib
+### Framework : Raylib
 
-### Play on itch.io: [https://senor16.itch.io/zeno-jam](https://senor16.itch.io/zeno-jam)
+### Play on itch.io: [https://senor16.itch.io/space-ascend](https://senor16.itch.io/space-ascend)
 
 ### Controls :
 
 Arrow keys and  WASD, to move  
-I,J to attack
+I  to make the ship go up  
+J to shoot at meteors
 
-### Code : By me
+### Code : [Senor16](https://senor16.itch.io)
 
-### Music : 
-Kneezuz
+### Music : [Kneezuz](https://kneezus.itch.io)
 
 ### Graphics :
 
 - Character : Free ninja sprites - Kunoichi - https://Craftpix.net
+- Background : Screaming Brain Studios
 
-### Development duration : 
+### Development duration : 16h
 
 ### Screenshots:
 
-![Play screen](screenshots/screenshot1.png)
-![Hurting](screenshots/screenshot2.png)
-![Failed](screenshots/failed.png)  
-![Victory](screenshots/victory.png)
+![Home](screenshots/home.png)
+![Playing](screenshots/gameplay.png)
+![Credits](screenshots/credits.png)  
+![Failed](screenshots/failure.png)

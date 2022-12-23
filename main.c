@@ -337,7 +337,7 @@ int main(void)
     Anim dead = LoadAnim("resources/images/Meteors/explosion.png",DEAD,20,10,0);
 
     float x=0,y=0;
-    for (int i=0; i<14; i++)
+    for (int i=0; i<2; i++)
     {
         x = 170 + 50*i;
         y=80;
@@ -590,6 +590,9 @@ int main(void)
 
             // Projectiles
             drawListProjectiles();
+
+            if(meteorsCount<=0)
+                gameWon=1;
 
             // Draw Game Over
             if(ship.state==DEAD)

@@ -2,7 +2,7 @@
 #define CONSTANTS_H_INCLUDED
 
 #define MAX_PROJECTILES 100
-#define MAX_METEORS 100
+#define MAX_METEORS 40
 #define SCREEN_WIDTH 512
 #define SCREEN_HEIGHT 700
 #define GAME_TITLE "Space Ascend"

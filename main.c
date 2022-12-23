@@ -356,7 +356,7 @@ int main(void)
     Anim dead = LoadAnim("resources/images/Meteors/explosion.png",DEAD,20,10,0);
 
     float x=165,y=0;
-    for (int i=0; i<21; i++)
+    for (int i=0; i<14; i++)
     {
         if (x>=SCREEN_WIDTH)
         {

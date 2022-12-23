@@ -32,10 +32,18 @@ Projectile listProjectiles[MAX_PROJECTILES];
 Hero listMeteorsBackup[MAX_METEORS],listMeteors[MAX_METEORS], ship;
 Scene gameScene;
 
+Sound sfxClick ;
+Sound sfxShoot ;
+Sound sfxVictory;
+Sound sfxExplosion ;
+Sound sfxShipExplosion ;
+int isClickPlaying,isVictoryPlaying,isShootPlaying,isExplosionPlaying,isShipExplosionPlaying;
+
 void addProjetile(float pX,float pY,float pVy)
 {
     if(projectilesCount<MAX_PROJECTILES)
     {
+        PlaySound(sfxShoot);
         listProjectiles[projectilesCount]= loadProjectile(pX,pY,animIdle,animDead);
         listProjectiles[projectilesCount].velocity.y=pVy;
         projectilesCount++;
@@ -58,10 +66,6 @@ void updateListProjectiles()
                 if (listMeteors[m].energy>0)
                 {
                     listMeteors[m].energy-=.5;
-                    //if (listMeteors[m].energy<=.5){
-                    //  listMeteors[m].pos.x = listMeteors[m].pos.x
-                    //}
-                    //printf("Meteor %d : %.2f\n",m,listMeteors[m].energy);
                 }
 
                 listProjectiles[i].velocity.y=0;
@@ -148,6 +152,7 @@ void updateMeteors()
         updateHero(&listMeteors[i]);
         if((listMeteors[i].state==DEAD && listMeteors[i].currentAnim.ended==1)|| listMeteors[i].pos.y>SCREEN_HEIGHT+20 )
         {
+            PlaySound(sfxExplosion);
             deleteMeteor(i);
         }
     }
@@ -169,6 +174,8 @@ void unloadMeteors()
     }
 }
 
+
+
 void deleteMeteor(int num)
 {
     for (int i=num; i<meteorsCount-1; i++)
@@ -189,13 +196,15 @@ int main(void)
 
     InitWindow(screenWidth, screenHeight, GAME_TITLE);
     InitAudioDevice();
-    gameScene = GAMEPLAY;
+
+    gameScene = MENU;
     projectilesCount=0;
     int exitGame=0;
     gameWon=0;
 
     // Menu buttons
     Vector2 mousePos;
+
     // Start
     Button btnStart;
     Image imgStart = LoadImage("resources/images/Gui/Start_BTN.png");
@@ -214,7 +223,6 @@ int main(void)
     btnExit.pos.y= 490;
     btnExit.isActive=0;
 
-
     // Credits
     Button btnCredits;
     Image imgCredits = LoadImage("resources/images/Gui/Info_BTN.png");
@@ -227,7 +235,18 @@ int main(void)
     char textCredits[200] = "\tWere involved in this jam : \n\t\t\tCode : senor16\n\t\t\tMusic: Kneezus\n\n\t\tThanks for Playing :)";
     int framesCounter = 0;
 
+    // Sfx
+    sfxClick = LoadSound("resources/sfx/click2.ogg");
+    sfxShoot = LoadSound("resources/sfx/shoot.mp3");
+    sfxVictory = LoadSound("resources/sfx/victory.mp3");
+    sfxExplosion = LoadSound("resources/sfx/Explosion.mp3");
+    sfxShipExplosion = LoadSound("resources/sfx/ShipExplosion.mp3");
 
+    isClickPlaying=0;
+    isVictoryPlaying=0;
+    isShootPlaying=0;
+    isExplosionPlaying=0;
+    isShipExplosionPlaying=0;
 
     // Musics
     Music mscCredits = LoadMusicStream("resources/musics/credits music.mp3");
@@ -344,11 +363,12 @@ int main(void)
             x=x-SCREEN_WIDTH+170;
             y+=60;
         }
-        addMeteor(x,y,0,.1,rand()%5+2,idle[rand()%10],dead);
+        addMeteor(x,y,0,.1,rand()%3+2,idle[rand()%10],dead);
         x += 50;
     }
 
-    for(int i=0;i<meteorsCount; i++){
+    for(int i=0; i<meteorsCount; i++)
+    {
         listMeteorsBackup[i] = listMeteors[i];
     }
 
@@ -387,6 +407,7 @@ int main(void)
                                btnCredits.pos.x,btnCredits.pos.y,btnCredits.texture.width,btnCredits.texture.height))
                 {
                     gameScene = CREDITS;
+                    PlaySound(sfxClick);
                 }
 
                 // Start game
@@ -394,6 +415,7 @@ int main(void)
                                btnStart.pos.x,btnStart.pos.y,btnStart.texture.width,btnStart.texture.height))
                 {
                     gameScene = GAMEPLAY;
+                    PlaySound(sfxClick);
                 }
             }
         }
@@ -414,6 +436,7 @@ int main(void)
                 if(isColliding(mousePos.x,mousePos.y,1,1,
                                btnStart.pos.x,btnStart.pos.y+150,btnStart.texture.width,btnStart.texture.height))
                 {
+                    PlaySound(sfxClick);
                     gameScene = GAMEPLAY;
                 }
             }
@@ -515,7 +538,24 @@ int main(void)
             // Projectiles
             updateListProjectiles();
 
-            // Perform action when failed
+            if(gameWon){
+                  if(isVictoryPlaying==0)
+                {
+                    PlaySound(sfxVictory);
+                    isVictoryPlaying=1;
+                }
+            }
+
+            if(ship.state==DEAD)
+            {
+                if(isShipExplosionPlaying==0)
+                {
+                    PlaySound(sfxShipExplosion);
+                    isShipExplosionPlaying=1;
+                }
+            }
+
+            // Restart the game
             if(ship.state==DEAD || gameWon)
             {
                 // Check mouse click
@@ -525,13 +565,15 @@ int main(void)
                     if(isColliding(mousePos.x,mousePos.y,1,1,
                                    btnStart.pos.x+60,btnStart.pos.y+150,btnStart.texture.width,btnStart.texture.height))
                     {
+                        StopSound(sfxVictory);
+                        PlaySound(sfxClick);
                         gameScene = GAMEPLAY;
-                        printf("Restart\n");
                         // Reset Ship
                         ship.pos.x = 300;
                         ship.pos.y=SCREEN_HEIGHT-200;
-                        ship.energy=5;
+                        ship.energy=5+1.5;
                         ship.state=IDLE;
+                        updateHero(&ship);
 
                         // Reset Hero
                         kunoichi.energy=5;
@@ -542,11 +584,11 @@ int main(void)
                         gameWon=0;
 
                         // Reset projectile
-                        for (int p=projectilesCount-1; p>=0; p--)
-                            removeProjectile(p);
+                        projectilesCount=0;
 
                         // Reset meteors
-                        for (int m=0; m<MAX_METEORS; m++){
+                        for (int m=0; m<MAX_METEORS; m++)
+                        {
                             listMeteors[m] = listMeteorsBackup[m];
                         }
                         meteorsCount = meteorsCountBackup;
@@ -580,7 +622,7 @@ int main(void)
             DrawTexture(bgPurple,0,0,WHITE);
             DrawText("Space Ascend",50,50,60,WHITE);
             DrawText("Made for the Zeno Jam 6",150,120,20,WHITE);
-            DrawText(TextSubtext(textCredits, 0, framesCounter/10),50,250,28,WHITE);
+            DrawText(TextSubtext(textCredits, 0, framesCounter/5),50,250,28,WHITE);
 
 
             DrawTexture(btnStart.texture,btnStart.pos.x,btnStart.pos.y+150,WHITE);
@@ -637,7 +679,9 @@ int main(void)
             drawListProjectiles();
 
             if(meteorsCount<=0)
+            {
                 gameWon=1;
+            }
 
 
             // Draw Game Over
@@ -646,7 +690,8 @@ int main(void)
                 DrawTexture(txtFailed,70,300,WHITE);
                 DrawTexture(btnStart.texture,btnStart.pos.x+60,btnStart.pos.y+150,WHITE);
             }
-            if(gameWon){
+            if(gameWon)
+            {
                 DrawTexture(txtWin,100,300,WHITE);
                 DrawTexture(btnStart.texture,btnStart.pos.x+60,btnStart.pos.y+150,WHITE);
             }
@@ -679,6 +724,12 @@ int main(void)
     UnloadMusicStream(mscCredits);
     UnloadMusicStream(mscGameplay);
     UnloadMusicStream(mscMenu);
+
+    UnloadSound(sfxClick);
+    UnloadSound(sfxExplosion);
+    UnloadSound(sfxShipExplosion);
+    UnloadSound(sfxVictory);
+    UnloadSound(sfxShoot);
 
 
     CloseAudioDevice();

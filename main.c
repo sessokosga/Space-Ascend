@@ -186,13 +186,13 @@ int main(void)
 
     InitWindow(screenWidth, screenHeight, GAME_TITLE);
     InitAudioDevice();
-    gameScene = MENU;
+    gameScene = CREDITS;
     projectilesCount=0;
     int exitGame=0;
 
     // Menu buttons
     Vector2 mousePos;
-        // Start
+    // Start
     Button btnStart;
     Image imgStart = LoadImage("resources/images/Gui/Start_BTN.png");
     btnStart.texture = LoadTextureFromImage(imgStart);
@@ -201,7 +201,7 @@ int main(void)
     btnStart.pos.y= 400;
     btnStart.isActive=0;
 
-        // Exit
+    // Exit
     Button btnExit;
     Image imgExit = LoadImage("resources/images/Gui/Exit_BTN.png");
     btnExit.texture = LoadTextureFromImage(imgExit);
@@ -211,7 +211,7 @@ int main(void)
     btnExit.isActive=0;
 
 
-        // Credits
+    // Credits
     Button btnCredits;
     Image imgCredits = LoadImage("resources/images/Gui/Info_BTN.png");
     btnCredits.texture = LoadTextureFromImage(imgCredits);
@@ -220,6 +220,8 @@ int main(void)
     btnCredits.pos.y= 590;
     btnCredits.isActive=0;
 
+    char textCredits[200] = "\tWere involved in this jam : \n\t\t\tCode : senor16\n\t\t\tMusic: Kneezus\n\n\t\tThanks for Playing :)";
+    int framesCounter = 0;
 
 
 
@@ -357,26 +359,33 @@ int main(void)
 
             UpdateMusicStream(mscMenu);
             // Check mouse click
-            if(IsMouseButtonPressed(0)){
-                printf("Click\n");
+            if(IsMouseButtonPressed(0))
+            {
                 mousePos = GetMousePosition();
                 // Exit the game
-                if(isColliding(mousePos.x,mousePos.y,2,2,btnExit.pos.x,btnExit.pos.y,btnExit.texture.width,btnExit.texture.height)){
+                if(isColliding(mousePos.x,mousePos.y,2,2,btnExit.pos.x,btnExit.pos.y,btnExit.texture.width,btnExit.texture.height))
+                {
                     exitGame = true;
                 }
+
+                // Open Credits
                 if(isColliding(mousePos.x,mousePos.y,1,1,
-                               btnCredits.pos.x,btnCredits.pos.y,btnCredits.texture.width,btnCredits.texture.height)){
+                               btnCredits.pos.x,btnCredits.pos.y,btnCredits.texture.width,btnCredits.texture.height))
+                {
                     gameScene = CREDITS;
                 }
 
+                // Start game
                 if(isColliding(mousePos.x,mousePos.y,1,1,
-                               btnStart.pos.x,btnStart.pos.y,btnStart.texture.width,btnStart.texture.height)){
+                               btnStart.pos.x,btnStart.pos.y,btnStart.texture.width,btnStart.texture.height))
+                {
                     gameScene = GAMEPLAY;
                 }
             }
         }
         if (gameScene == CREDITS)
         {
+            framesCounter++;
             if (isMenuPlaying==1)
                 StopMusicStream(mscMenu);
             if(isCreditsPlaying==0)
@@ -384,11 +393,23 @@ int main(void)
 
 
             UpdateMusicStream(mscCredits);
+            // Check mouse click
+            if(IsMouseButtonPressed(0))
+            {
+                mousePos = GetMousePosition();
+                if(isColliding(mousePos.x,mousePos.y,1,1,
+                               btnStart.pos.x,btnStart.pos.y+150,btnStart.texture.width,btnStart.texture.height))
+                {
+                    gameScene = GAMEPLAY;
+                }
+            }
         }
         if (gameScene == GAMEPLAY)
         {
             if (isMenuPlaying==1)
                 StopMusicStream(mscMenu);
+               if (isCreditsPlaying==1)
+                StopMusicStream(mscCredits);
             if(isGameplayPlaying==0)
                 PlayMusicStream(mscGameplay);
 
@@ -500,6 +521,12 @@ int main(void)
         if (gameScene == CREDITS)
         {
             DrawTexture(bgPurple,0,0,WHITE);
+            DrawText("Space Ascend",50,50,60,WHITE);
+            DrawText("Made for the Zeno Jam 6",150,120,20,WHITE);
+            DrawText(TextSubtext(textCredits, 0, framesCounter/10)   ,50,250,28 ,WHITE);
+
+
+            DrawTexture(btnStart.texture,btnStart.pos.x,btnStart.pos.y+150,WHITE);
         }
         if (gameScene == GAMEPLAY)
         {

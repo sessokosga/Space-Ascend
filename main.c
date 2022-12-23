@@ -405,6 +405,14 @@ int main(void)
         sprintf(&energyText,"%.2f s",  ship.energy);
         DrawText(energyText,60,240,20,WHITE);
 
+        // Draw Game Over
+        if(ship.state==DEAD){
+            DrawText("Game Over : ",70,300,70,WHITE);
+        }
+
+        // Draw Credits
+        //DrawText("\tCredits : \nCode : Sesso Kosga",50,20,20,WHITE);
+
         // Left button
         if (btnLeft.isActive==0)
             DrawTexture(btnLeft.texture,btnLeft.pos.x,btnLeft.pos.y,WHITE);

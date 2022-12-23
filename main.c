@@ -24,12 +24,12 @@ typedef struct Button
     int isActive;
 } Button;
 
-int projectilesCount, meteorsCount,gameWon;
+int projectilesCount, meteorsCount, meteorsCountBackup,gameWon;
 Anim animIdle, animDead;
 
 
 Projectile listProjectiles[MAX_PROJECTILES];
-Hero listMeteors[MAX_METEORS], ship;
+Hero listMeteorsBackup[MAX_METEORS],listMeteors[MAX_METEORS], ship;
 Scene gameScene;
 
 void addProjetile(float pX,float pY,float pVy)
@@ -336,19 +336,23 @@ int main(void)
 
     Anim dead = LoadAnim("resources/images/Meteors/explosion.png",DEAD,20,10,0);
 
-    float x=0,y=0;
-    for (int i=0; i<2; i++)
+    float x=165,y=0;
+    for (int i=0; i<21; i++)
     {
-        x = 170 + 50*i;
-        y=80;
         if (x>=SCREEN_WIDTH)
         {
             x=x-SCREEN_WIDTH+170;
             y+=60;
         }
-
-        addMeteor(x,y,0,.1,5,idle[rand()%10],dead);
+        addMeteor(x,y,0,.1,rand()%5+2,idle[rand()%10],dead);
+        x += 50;
     }
+
+    for(int i=0;i<meteorsCount; i++){
+        listMeteorsBackup[i] = listMeteors[i];
+    }
+
+    meteorsCountBackup= meteorsCount;
 
     // Projectiles
     animIdle= LoadAnim("resources/images/Ship3/Shot3/idle.png",IDLE,5,2,0);
@@ -510,6 +514,47 @@ int main(void)
 
             // Projectiles
             updateListProjectiles();
+
+            // Perform action when failed
+            if(ship.state==DEAD || gameWon)
+            {
+                // Check mouse click
+                if(IsMouseButtonPressed(0))
+                {
+                    mousePos = GetMousePosition();
+                    if(isColliding(mousePos.x,mousePos.y,1,1,
+                                   btnStart.pos.x+60,btnStart.pos.y+150,btnStart.texture.width,btnStart.texture.height))
+                    {
+                        gameScene = GAMEPLAY;
+                        printf("Restart\n");
+                        // Reset Ship
+                        ship.pos.x = 300;
+                        ship.pos.y=SCREEN_HEIGHT-200;
+                        ship.energy=5;
+                        ship.state=IDLE;
+
+                        // Reset Hero
+                        kunoichi.energy=5;
+                        kunoichi.state=IDLE;
+
+                        // Reset game state
+                        timeElapsed=0;
+                        gameWon=0;
+
+                        // Reset projectile
+                        for (int p=projectilesCount-1; p>=0; p--)
+                            removeProjectile(p);
+
+                        // Reset meteors
+                        for (int m=0; m<MAX_METEORS; m++){
+                            listMeteors[m] = listMeteorsBackup[m];
+                        }
+                        meteorsCount = meteorsCountBackup;
+
+
+                    }
+                }
+            }
         }
 
         //----------------------------------------------------------------------------------
@@ -594,21 +639,25 @@ int main(void)
             if(meteorsCount<=0)
                 gameWon=1;
 
+
             // Draw Game Over
             if(ship.state==DEAD)
             {
                 DrawTexture(txtFailed,70,300,WHITE);
+                DrawTexture(btnStart.texture,btnStart.pos.x+60,btnStart.pos.y+150,WHITE);
             }
-            if(gameWon)
+            if(gameWon){
                 DrawTexture(txtWin,100,300,WHITE);
+                DrawTexture(btnStart.texture,btnStart.pos.x+60,btnStart.pos.y+150,WHITE);
+            }
 
         }
         EndDrawing();
         //----------------------------------------------------------------------------------
     }
 
-    // De-Initialization
-    //--------------------------------------------------------------------------------------
+// De-Initialization
+//--------------------------------------------------------------------------------------
 
     unloadHero(kunoichi);
     unloadHero(ship);
@@ -635,7 +684,7 @@ int main(void)
     CloseAudioDevice();
 
     CloseWindow(); // Close window and OpenGL context
-    //--------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------
 
     return 0;
 }

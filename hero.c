@@ -48,12 +48,11 @@ void playHeroAnim(Hero *pHero, const HeroState pId)
 
 void updateHero(Hero *pHero)
 {
-    if (pHero->state != DEAD)
-    {
         if (pHero->type == HERO)
             pHero->velocity.x=pHero->velocity.y=0;
         state = pHero->state;
-        if(pHero->type == HERO)
+
+        if(pHero->type == HERO && pHero->state != DEAD)
         {
             if ((pHero->currentAnim.id == RUN || pHero->currentAnim.id == IDLE ) || (pHero->currentAnim.id != RUN && pHero->currentAnim.ended))
             {
@@ -142,10 +141,12 @@ void updateHero(Hero *pHero)
                 pHero->velocity.y+=0.008;
             pHero->pos.y+=pHero->velocity.y;
 
-
-
             if(pHero->pos.y > SCREEN_HEIGHT){
                 pHero->energy=0;
+            }
+
+            if(pHero->state == DEAD){
+                pHero->velocity.x=pHero->velocity.y=0;
             }
         }
 
@@ -154,8 +155,6 @@ void updateHero(Hero *pHero)
             pHero->pos.x+=pHero->velocity.x;
             pHero->pos.y+=pHero->velocity.y;
         }
-
-
 
         // Play the right animation
         pHero->state = state;
@@ -210,7 +209,7 @@ void updateHero(Hero *pHero)
         {
             flipAnimVertical(&pHero->currentAnim);
         }
-    }
+
     updateAnim(&pHero->currentAnim);
 }
 

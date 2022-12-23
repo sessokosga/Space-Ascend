@@ -5,7 +5,7 @@
 1671177852 d:\projects\developement\game\raylib\code blocks\zeno\anim.h
 	"raylib.h"
 
-1671723920 source:d:\projects\developement\game\raylib\code blocks\zeno\hero.c
+1671778337 source:d:\projects\developement\game\raylib\code blocks\zeno\hero.c
 	"hero.h"
 	"constants.h"
 
@@ -22,7 +22,7 @@
 	"raylib.h"
 	"anim.h"
 
-1671723610 source:d:\projects\developement\game\raylib\code blocks\zeno\main.c
+1671778603 source:d:\projects\developement\game\raylib\code blocks\zeno\main.c
 	"raylib.h"
 	"anim.h"
 	"hero.h"

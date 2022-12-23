@@ -24,7 +24,7 @@ Anim animIdle, animDead;
 
 
 Projectile listProjectiles[MAX_PROJECTILES];
-Hero listMeteors[MAX_METEORS];
+Hero listMeteors[MAX_METEORS], ship;
 
 void addProjetile(float pX,float pY,float pVy)
 {
@@ -42,7 +42,7 @@ void updateListProjectiles()
     {
         for(int m=meteorsCount-1; m>=0; m--)
         {
-            if (listProjectiles[i].del==0 &&
+            if (listProjectiles[i].del==0 && listMeteors[m].energy>0 &&
                     isColliding(listProjectiles[i].pos.x, listProjectiles[i].pos.y, listProjectiles[i].idleAnim.frameRec.width/1.5,
                                 listProjectiles[i].idleAnim.frameRec.height,
                                 listMeteors[m].pos.x,listMeteors[m].pos.y,listMeteors[m].currentAnim.frameRec.width/1.5,
@@ -117,8 +117,27 @@ void updateMeteors()
 {
     for (int i=meteorsCount-1; i>=0; i--)
     {
+        if (ship.energy> 0 && listMeteors[i].energy>0 &&  isColliding(ship.pos.x, ship.pos.y, ship.currentAnim.frameRec.width/1.5,
+                        ship.currentAnim.frameRec.height,
+                        listMeteors[i].pos.x,listMeteors[i].pos.y,listMeteors[i].currentAnim.frameRec.width/1.5,
+                        listMeteors[i].currentAnim.frameRec.height/2.5))
+        {
+
+            if (listMeteors[i].energy>0)
+            {
+                listMeteors[i].energy-=2;
+            }
+
+            if(ship.energy>0)
+            {
+                ship.energy-=.5;
+                ship.velocity.y=1;
+                ship.pos.y+=3;
+            }
+        }
+
         updateHero(&listMeteors[i]);
-        if((listMeteors[i].state==DEAD && listMeteors[i].currentAnim.ended)|| listMeteors[i].pos.y>SCREEN_HEIGHT+20 )
+        if((listMeteors[i].state==DEAD && listMeteors[i].currentAnim.ended==1)|| listMeteors[i].pos.y>SCREEN_HEIGHT+20 )
         {
             deleteMeteor(i);
         }
@@ -157,7 +176,7 @@ int main(void)
     const int screenWidth = SCREEN_WIDTH;
     const int screenHeight = SCREEN_HEIGHT;
     float dt,engineTimer=0,timeElapsed=0;
-    char timeText[50]="";
+    char timeText[10]="",energyText[10]="";
 
     InitWindow(screenWidth, screenHeight, GAME_TITLE);
 
@@ -187,10 +206,12 @@ int main(void)
     addHeroAnim(&kunoichi,LoadAnim("resources/images/Kunoichi/Hurt.png",HURT,4, 1,0));
 
     // Ship
-    Hero ship = loadHero();
+    ship = loadHero();
     ship.pos.x = 300;
-    ship.pos.y=SCREEN_HEIGHT-200;
+    //ship.pos.y=SCREEN_HEIGHT-200;
+    ship.pos.y=SCREEN_HEIGHT-500;
     ship.type = SHIP;
+    ship.energy=5;
     addHeroAnim(&ship,LoadAnim("resources/images/Ship3/Ship3.png",IDLE,1,0,1));
     addHeroAnim(&ship,LoadAnim("resources/images/Ship3/Ship3_Explosion.png",DEAD,8,10,0));
 
@@ -332,13 +353,14 @@ int main(void)
                     }
                 }
             }
+        }
             // Meteors
             updateMeteors();
-        }
+
 
         // Hero
         updateHero(&kunoichi);
-        if (ship.pos.y>SCREEN_HEIGHT)
+        if (ship.pos.y>SCREEN_HEIGHT || ship.state==DEAD)
         {
             kunoichi.energy=0;
             printf("Dead : %d, Kuno : %d\n",DEAD,kunoichi.state);
@@ -374,10 +396,14 @@ int main(void)
             DrawTexture(bgPurple,0,0,WHITE);
 
         // Time elapsed
-        DrawText("Time elapsed : ",13,60,20,WHITE);
-
+        DrawText("Time elapsed : ",13,110,20,WHITE);
         sprintf(&timeText,"%.0f s",  timeElapsed);
-        DrawText(timeText,60,100,20,WHITE);
+        DrawText(timeText,60,150,20,WHITE);
+
+        // Ship energy
+        DrawText("Energy : ",50,200,20,WHITE);
+        sprintf(&energyText,"%.2f s",  ship.energy);
+        DrawText(energyText,60,240,20,WHITE);
 
         // Left button
         if (btnLeft.isActive==0)
@@ -397,11 +423,10 @@ int main(void)
         else
             DrawTexture(btnHit.textureActive,btnHit.pos.x,btnHit.pos.y,WHITE);
 
-
-
         // Hero
         drawHero(kunoichi);
-        drawHero(ship);
+        if (ship.energy>0 || (ship.state==DEAD && ship.currentAnim.ended==0))
+            drawHero(ship);
         if(ship.isEngineOn==1)
             drawAnim(shipEngine);
 
@@ -435,7 +460,6 @@ int main(void)
     UnloadTexture(btnHit.texture);
     UnloadTexture(btnHit.textureActive);
     unloadMeteors();
-
 
     CloseWindow(); // Close window and OpenGL context
     //--------------------------------------------------------------------------------------

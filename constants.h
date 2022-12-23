@@ -5,6 +5,6 @@
 #define MAX_METEORS 100
 #define SCREEN_WIDTH 512
 #define SCREEN_HEIGHT 700
-#define GAME_TITLE "Zeno Jam 6"
+#define GAME_TITLE "Space Ascend"
 
 #endif // CONSTANTS_H_INCLUDED

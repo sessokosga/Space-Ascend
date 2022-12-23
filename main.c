@@ -5,7 +5,12 @@
 #include "constants.h"
 #include <time.h>
 
-
+typedef enum
+{
+    MENU,
+    GAMEPLAY,
+    CREDITS
+} Scene;
 
 int isColliding( float x1, float y1, float w1,float h1,float x2, float y2,float w2,float h2)
 {
@@ -25,6 +30,7 @@ Anim animIdle, animDead;
 
 Projectile listProjectiles[MAX_PROJECTILES];
 Hero listMeteors[MAX_METEORS], ship;
+Scene gameScene;
 
 void addProjetile(float pX,float pY,float pVy)
 {
@@ -118,9 +124,9 @@ void updateMeteors()
     for (int i=meteorsCount-1; i>=0; i--)
     {
         if (ship.energy> 0 && listMeteors[i].energy>0 &&  isColliding(ship.pos.x, ship.pos.y, ship.currentAnim.frameRec.width/1.5,
-                        ship.currentAnim.frameRec.height,
-                        listMeteors[i].pos.x,listMeteors[i].pos.y,listMeteors[i].currentAnim.frameRec.width/1.5,
-                        listMeteors[i].currentAnim.frameRec.height/2.5))
+                ship.currentAnim.frameRec.height,
+                listMeteors[i].pos.x,listMeteors[i].pos.y,listMeteors[i].currentAnim.frameRec.width/1.5,
+                listMeteors[i].currentAnim.frameRec.height/2.5))
         {
 
             if (listMeteors[i].energy>0)
@@ -179,8 +185,55 @@ int main(void)
     char timeText[10]="",energyText[10]="";
 
     InitWindow(screenWidth, screenHeight, GAME_TITLE);
-
+    InitAudioDevice();
+    gameScene = MENU;
     projectilesCount=0;
+    int exitGame=0;
+
+    // Menu buttons
+    Vector2 mousePos;
+        // Start
+    Button btnStart;
+    Image imgStart = LoadImage("resources/images/Gui/Start_BTN.png");
+    btnStart.texture = LoadTextureFromImage(imgStart);
+    UnloadImage(imgStart);
+    btnStart.pos.x = 150;
+    btnStart.pos.y= 400;
+    btnStart.isActive=0;
+
+        // Exit
+    Button btnExit;
+    Image imgExit = LoadImage("resources/images/Gui/Exit_BTN.png");
+    btnExit.texture = LoadTextureFromImage(imgExit);
+    UnloadImage(imgExit);
+    btnExit.pos.x = 150;
+    btnExit.pos.y= 490;
+    btnExit.isActive=0;
+
+
+        // Credits
+    Button btnCredits;
+    Image imgCredits = LoadImage("resources/images/Gui/Info_BTN.png");
+    btnCredits.texture = LoadTextureFromImage(imgCredits);
+    UnloadImage(imgCredits);
+    btnCredits.pos.x = 220;
+    btnCredits.pos.y= 590;
+    btnCredits.isActive=0;
+
+
+
+
+    // Musics
+    Music mscCredits = LoadMusicStream("resources/musics/credits music.mp3");
+    mscCredits.looping = true;
+    int isCreditsPlaying = 0;
+    Music mscGameplay = LoadMusicStream("resources/musics/gameplay music.mp3");
+    mscGameplay.looping=true;
+    int isGameplayPlaying=0;
+    Music mscMenu = LoadMusicStream("resources/musics/menu music.mp3");
+    mscMenu.looping = true;
+    int isMenuPlaying  = 0;
+
 
     // Background
     Image imgPurple = LoadImage("resources/images/Background/Purple Nebula 7.png");
@@ -293,94 +346,138 @@ int main(void)
     //--------------------------------------------------------------------------------------
 
     // Main game loop
-    while (!WindowShouldClose()) // Detect window close button or ESC key
+    while (!WindowShouldClose() && exitGame==0) // Detect window close button or ESC key
     {
         // Update
         //----------------------------------------------------------------------------------
-        dt = GetFrameTime();
-        if (kunoichi.state!= DEAD )
+        if (gameScene == MENU)
         {
-            timeElapsed+=dt;
+            if(isMenuPlaying==0)
+                PlayMusicStream(mscMenu);
 
-//        printf("Meteors : %d, Projectiles : %d\n",meteorsCount,projectilesCount);
-
-            // Left button
-            btnLeft.isActive = isColliding(btnLeft.pos.x,btnLeft.pos.y,btnLeft.texture.width,btnLeft.texture.height,
-                                           kunoichi.pos.x+60,kunoichi.pos.y+109,20,20);
-            if(btnLeft.isActive==1)
-            {
-                ship.velocity.x=-1;
-            }
-
-            // Right button
-            btnRight.isActive = isColliding(btnRight.pos.x,btnRight.pos.y,btnRight.texture.width,btnRight.texture.height,
-                                            kunoichi.pos.x+50,kunoichi.pos.y+109,20,20);
-            if (btnRight.isActive==1)
-            {
-                ship.velocity.x=1;
-            }
-
-            if (btnRight.isActive==0 && btnLeft.isActive==0)
-                ship.velocity.x=0;
-
-            // Hit button
-            if (kunoichi.pos.x>=-12 && kunoichi.flipX==1)
-            {
-                if (kunoichi.state == ATTACK_1)
-                {
-                    if (kunoichi.currentAnim.currentFrame == 3 )
-                    {
-                        btnHit.isActive=1;
-                        ship.velocity.y=-1;
-                        ship.isEngineOn = 1;
-                        engineTimer=0;
-                    }
-                    else
-                    {
-                        btnHit.isActive=0;
-                    }
+            UpdateMusicStream(mscMenu);
+            // Check mouse click
+            if(IsMouseButtonPressed(0)){
+                printf("Click\n");
+                mousePos = GetMousePosition();
+                // Exit the game
+                if(isColliding(mousePos.x,mousePos.y,2,2,btnExit.pos.x,btnExit.pos.y,btnExit.texture.width,btnExit.texture.height)){
+                    exitGame = true;
                 }
-                if (kunoichi.state == ATTACK_2)
-                {
-                    if (kunoichi.currentAnim.currentFrame == 5 && btnHit.isActive==0 )
-                    {
-                        btnHit.isActive=1;
-                        addProjetile(ship.pos.x+28,ship.pos.y-20,-4);
-                    }
-                    else
-                    {
-                        btnHit.isActive=0;
-                    }
+                if(isColliding(mousePos.x,mousePos.y,1,1,
+                               btnCredits.pos.x,btnCredits.pos.y,btnCredits.texture.width,btnCredits.texture.height)){
+                    gameScene = CREDITS;
+                }
+
+                if(isColliding(mousePos.x,mousePos.y,1,1,
+                               btnStart.pos.x,btnStart.pos.y,btnStart.texture.width,btnStart.texture.height)){
+                    gameScene = GAMEPLAY;
                 }
             }
         }
+        if (gameScene == CREDITS)
+        {
+            if (isMenuPlaying==1)
+                StopMusicStream(mscMenu);
+            if(isCreditsPlaying==0)
+                PlayMusicStream(mscCredits);
+
+
+            UpdateMusicStream(mscCredits);
+        }
+        if (gameScene == GAMEPLAY)
+        {
+            if (isMenuPlaying==1)
+                StopMusicStream(mscMenu);
+            if(isGameplayPlaying==0)
+                PlayMusicStream(mscGameplay);
+
+            UpdateMusicStream(mscGameplay);
+
+            dt = GetFrameTime();
+            if (kunoichi.state!= DEAD )
+            {
+                timeElapsed+=dt;
+
+//        printf("Meteors : %d, Projectiles : %d\n",meteorsCount,projectilesCount);
+
+                // Left button
+                btnLeft.isActive = isColliding(btnLeft.pos.x,btnLeft.pos.y,btnLeft.texture.width,btnLeft.texture.height,
+                                               kunoichi.pos.x+60,kunoichi.pos.y+109,20,20);
+                if(btnLeft.isActive==1)
+                {
+                    ship.velocity.x=-1;
+                }
+
+                // Right button
+                btnRight.isActive = isColliding(btnRight.pos.x,btnRight.pos.y,btnRight.texture.width,btnRight.texture.height,
+                                                kunoichi.pos.x+50,kunoichi.pos.y+109,20,20);
+                if (btnRight.isActive==1)
+                {
+                    ship.velocity.x=1;
+                }
+
+                if (btnRight.isActive==0 && btnLeft.isActive==0)
+                    ship.velocity.x=0;
+
+                // Hit button
+                if (kunoichi.pos.x>=-12 && kunoichi.flipX==1)
+                {
+                    if (kunoichi.state == ATTACK_1)
+                    {
+                        if (kunoichi.currentAnim.currentFrame == 3 )
+                        {
+                            btnHit.isActive=1;
+                            ship.velocity.y=-1;
+                            ship.isEngineOn = 1;
+                            engineTimer=0;
+                        }
+                        else
+                        {
+                            btnHit.isActive=0;
+                        }
+                    }
+                    if (kunoichi.state == ATTACK_2)
+                    {
+                        if (kunoichi.currentAnim.currentFrame == 5 && btnHit.isActive==0 )
+                        {
+                            btnHit.isActive=1;
+                            addProjetile(ship.pos.x+28,ship.pos.y-20,-4);
+                        }
+                        else
+                        {
+                            btnHit.isActive=0;
+                        }
+                    }
+                }
+            }
             // Meteors
             updateMeteors();
 
 
-        // Hero
-        updateHero(&kunoichi);
-        if (ship.pos.y>SCREEN_HEIGHT || ship.state==DEAD)
-        {
-            kunoichi.energy=0;
-            printf("Dead : %d, Kuno : %d\n",DEAD,kunoichi.state);
+            // Hero
+            updateHero(&kunoichi);
+            if (ship.pos.y>SCREEN_HEIGHT || ship.state==DEAD)
+            {
+                kunoichi.energy=0;
+                printf("Dead : %d, Kuno : %d\n",DEAD,kunoichi.state);
+            }
+
+            // Ship
+            if (ship.isEngineOn)
+                engineTimer+=dt;
+            if (engineTimer>=.4)
+            {
+                ship.isEngineOn = 0;
+            }
+            updateHero(&ship);
+            shipEngine.pos.x = ship.pos.x+23;
+            shipEngine.pos.y = ship.pos.y+64;
+            updateAnim(&shipEngine);
+
+            // Projectiles
+            updateListProjectiles();
         }
-
-        // Ship
-        if (ship.isEngineOn)
-            engineTimer+=dt;
-        if (engineTimer>=.4)
-        {
-            ship.isEngineOn = 0;
-        }
-        updateHero(&ship);
-        shipEngine.pos.x = ship.pos.x+23;
-        shipEngine.pos.y = ship.pos.y+64;
-        updateAnim(&shipEngine);
-
-        // Projectiles
-        updateListProjectiles();
-
 
         //----------------------------------------------------------------------------------
 
@@ -389,65 +486,84 @@ int main(void)
         BeginDrawing();
         ClearBackground(RAYWHITE);
 
-        // Background
-        if (currentBG==1)
-            DrawTexture(bgStarfield,0,0,WHITE);
-        else
+        if (gameScene == MENU)
+        {
             DrawTexture(bgPurple,0,0,WHITE);
+            DrawText("Space Ascend",50,130,60,WHITE);
+            DrawText("Made for the Zeno Jam 6",150,200,20,WHITE);
 
-        // Time elapsed
-        DrawText("Time elapsed : ",13,110,20,WHITE);
-        sprintf(&timeText,"%.0f s",  timeElapsed);
-        DrawText(timeText,60,150,20,WHITE);
+            DrawTexture(btnStart.texture,btnStart.pos.x,btnStart.pos.y,WHITE);
+            DrawTexture(btnCredits.texture,btnCredits.pos.x,btnCredits.pos.y,WHITE);
+            DrawTexture(btnExit.texture,btnExit.pos.x,btnExit.pos.y,WHITE);
 
-        // Ship energy
-        DrawText("Energy : ",50,200,20,WHITE);
-        sprintf(&energyText,"%.2f s",  ship.energy);
-        DrawText(energyText,60,240,20,WHITE);
-
-        // Draw Game Over
-        if(ship.state==DEAD){
-            DrawText("Game Over : ",70,300,70,WHITE);
         }
+        if (gameScene == CREDITS)
+        {
+            DrawTexture(bgPurple,0,0,WHITE);
+        }
+        if (gameScene == GAMEPLAY)
+        {
 
-        // Draw Credits
-        //DrawText("\tCredits : \nCode : Sesso Kosga",50,20,20,WHITE);
+            // Background
+            if (currentBG==1)
+                DrawTexture(bgStarfield,0,0,WHITE);
+            else
+                DrawTexture(bgPurple,0,0,WHITE);
 
-        // Left button
-        if (btnLeft.isActive==0)
-            DrawTexture(btnLeft.texture,btnLeft.pos.x,btnLeft.pos.y,WHITE);
-        else
-            DrawTexture(btnLeft.textureActive,btnLeft.pos.x,btnLeft.pos.y,WHITE);
+            // Time elapsed
+            DrawText("Time elapsed : ",13,110,20,WHITE);
+            sprintf(&timeText,"%.0f s",  timeElapsed);
+            DrawText(timeText,60,150,20,WHITE);
 
-        // Right button
-        if (btnRight.isActive==0)
-            DrawTexture(btnRight.texture,btnRight.pos.x,btnRight.pos.y,WHITE);
-        else
-            DrawTexture(btnRight.textureActive,btnRight.pos.x,btnRight.pos.y,WHITE);
+            // Ship energy
+            DrawText("Energy : ",50,200,20,WHITE);
+            sprintf(&energyText,"%.2f s",  ship.energy);
+            DrawText(energyText,60,240,20,WHITE);
 
-        // Hit button
-        if (btnHit.isActive==0)
-            DrawTexture(btnHit.texture,btnHit.pos.x,btnHit.pos.y,WHITE);
-        else
-            DrawTexture(btnHit.textureActive,btnHit.pos.x,btnHit.pos.y,WHITE);
+            // Draw Game Over
+            if(ship.state==DEAD)
+            {
+                DrawText("Game Over : ",70,300,70,WHITE);
+            }
 
-        // Hero
-        drawHero(kunoichi);
-        if (ship.energy>0 || (ship.state==DEAD && ship.currentAnim.ended==0))
-            drawHero(ship);
-        if(ship.isEngineOn==1)
-            drawAnim(shipEngine);
+            // Draw Credits
+            //DrawText("\tCredits : \nCode : Sesso Kosga",50,20,20,WHITE);
 
-        //printf("Ship y : %.2f\n",ship.pos.y);
+            // Left button
+            if (btnLeft.isActive==0)
+                DrawTexture(btnLeft.texture,btnLeft.pos.x,btnLeft.pos.y,WHITE);
+            else
+                DrawTexture(btnLeft.textureActive,btnLeft.pos.x,btnLeft.pos.y,WHITE);
 
-        // Projectiles
+            // Right button
+            if (btnRight.isActive==0)
+                DrawTexture(btnRight.texture,btnRight.pos.x,btnRight.pos.y,WHITE);
+            else
+                DrawTexture(btnRight.textureActive,btnRight.pos.x,btnRight.pos.y,WHITE);
 
-        // Meteors
-        drawMeteors();
+            // Hit button
+            if (btnHit.isActive==0)
+                DrawTexture(btnHit.texture,btnHit.pos.x,btnHit.pos.y,WHITE);
+            else
+                DrawTexture(btnHit.textureActive,btnHit.pos.x,btnHit.pos.y,WHITE);
 
-        // Projectiles
-        drawListProjectiles();
+            // Hero
+            drawHero(kunoichi);
+            if (ship.energy>0 || (ship.state==DEAD && ship.currentAnim.ended==0))
+                drawHero(ship);
+            if(ship.isEngineOn==1)
+                drawAnim(shipEngine);
 
+            //printf("Ship y : %.2f\n",ship.pos.y);
+
+            // Projectiles
+
+            // Meteors
+            drawMeteors();
+
+            // Projectiles
+            drawListProjectiles();
+        }
         EndDrawing();
         //----------------------------------------------------------------------------------
     }
@@ -467,7 +583,17 @@ int main(void)
     UnloadTexture(btnRight.textureActive);
     UnloadTexture(btnHit.texture);
     UnloadTexture(btnHit.textureActive);
+    UnloadTexture(btnStart.texture);
+    UnloadTexture(btnCredits.texture);
+    UnloadTexture(btnExit.texture);
     unloadMeteors();
+
+    UnloadMusicStream(mscCredits);
+    UnloadMusicStream(mscGameplay);
+    UnloadMusicStream(mscMenu);
+
+
+    CloseAudioDevice();
 
     CloseWindow(); // Close window and OpenGL context
     //--------------------------------------------------------------------------------------

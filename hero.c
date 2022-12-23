@@ -141,9 +141,7 @@ void updateHero(Hero *pHero)
                 pHero->velocity.y+=0.008;
             pHero->pos.y+=pHero->velocity.y;
 
-            if(pHero->pos.y > SCREEN_HEIGHT){
-                pHero->energy=0;
-            }
+
 
             if(pHero->state == DEAD){
                 pHero->velocity.x=pHero->velocity.y=0;

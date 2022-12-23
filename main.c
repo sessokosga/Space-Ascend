@@ -24,7 +24,7 @@ typedef struct Button
     int isActive;
 } Button;
 
-int projectilesCount, meteorsCount;
+int projectilesCount, meteorsCount,gameWon;
 Anim animIdle, animDead;
 
 
@@ -142,6 +142,9 @@ void updateMeteors()
             }
         }
 
+        if(gameWon)
+            listMeteors[i].velocity.y=0;
+
         updateHero(&listMeteors[i]);
         if((listMeteors[i].state==DEAD && listMeteors[i].currentAnim.ended==1)|| listMeteors[i].pos.y>SCREEN_HEIGHT+20 )
         {
@@ -186,9 +189,10 @@ int main(void)
 
     InitWindow(screenWidth, screenHeight, GAME_TITLE);
     InitAudioDevice();
-    gameScene = CREDITS;
+    gameScene = GAMEPLAY;
     projectilesCount=0;
     int exitGame=0;
+    gameWon=0;
 
     // Menu buttons
     Vector2 mousePos;
@@ -236,6 +240,13 @@ int main(void)
     mscMenu.looping = true;
     int isMenuPlaying  = 0;
 
+    // Victory / Failure img
+    Image imgwin = LoadImage("resources/images/Gui/You_Win.png");
+    Texture txtWin = LoadTextureFromImage(imgwin);
+    Image imgFailed = LoadImage("resources/images/Gui/You_Lose.png");
+    Texture txtFailed = LoadTextureFromImage(imgFailed);
+
+
 
     // Background
     Image imgPurple = LoadImage("resources/images/Background/Purple Nebula 7.png");
@@ -263,8 +274,7 @@ int main(void)
     // Ship
     ship = loadHero();
     ship.pos.x = 300;
-    //ship.pos.y=SCREEN_HEIGHT-200;
-    ship.pos.y=SCREEN_HEIGHT-500;
+    ship.pos.y=SCREEN_HEIGHT-200;
     ship.type = SHIP;
     ship.energy=5;
     addHeroAnim(&ship,LoadAnim("resources/images/Ship3/Ship3.png",IDLE,1,0,1));
@@ -408,7 +418,7 @@ int main(void)
         {
             if (isMenuPlaying==1)
                 StopMusicStream(mscMenu);
-               if (isCreditsPlaying==1)
+            if (isCreditsPlaying==1)
                 StopMusicStream(mscCredits);
             if(isGameplayPlaying==0)
                 PlayMusicStream(mscGameplay);
@@ -416,11 +426,9 @@ int main(void)
             UpdateMusicStream(mscGameplay);
 
             dt = GetFrameTime();
-            if (kunoichi.state!= DEAD )
+            if (kunoichi.state!= DEAD && !gameWon )
             {
                 timeElapsed+=dt;
-
-//        printf("Meteors : %d, Projectiles : %d\n",meteorsCount,projectilesCount);
 
                 // Left button
                 btnLeft.isActive = isColliding(btnLeft.pos.x,btnLeft.pos.y,btnLeft.texture.width,btnLeft.texture.height,
@@ -478,22 +486,26 @@ int main(void)
 
             // Hero
             updateHero(&kunoichi);
-            if (ship.pos.y>SCREEN_HEIGHT || ship.state==DEAD)
+            if ((ship.pos.y>SCREEN_HEIGHT || ship.state==DEAD)&& !gameWon)
             {
                 kunoichi.energy=0;
-                printf("Dead : %d, Kuno : %d\n",DEAD,kunoichi.state);
+                ship.energy=0;
             }
 
             // Ship
+
             if (ship.isEngineOn)
                 engineTimer+=dt;
             if (engineTimer>=.4)
             {
                 ship.isEngineOn = 0;
             }
+            if(gameWon)
+                ship.velocity.y=0;
             updateHero(&ship);
             shipEngine.pos.x = ship.pos.x+23;
             shipEngine.pos.y = ship.pos.y+64;
+
             updateAnim(&shipEngine);
 
             // Projectiles
@@ -523,7 +535,7 @@ int main(void)
             DrawTexture(bgPurple,0,0,WHITE);
             DrawText("Space Ascend",50,50,60,WHITE);
             DrawText("Made for the Zeno Jam 6",150,120,20,WHITE);
-            DrawText(TextSubtext(textCredits, 0, framesCounter/10)   ,50,250,28 ,WHITE);
+            DrawText(TextSubtext(textCredits, 0, framesCounter/10),50,250,28,WHITE);
 
 
             DrawTexture(btnStart.texture,btnStart.pos.x,btnStart.pos.y+150,WHITE);
@@ -546,15 +558,6 @@ int main(void)
             DrawText("Energy : ",50,200,20,WHITE);
             sprintf(&energyText,"%.2f s",  ship.energy);
             DrawText(energyText,60,240,20,WHITE);
-
-            // Draw Game Over
-            if(ship.state==DEAD)
-            {
-                DrawText("Game Over : ",70,300,70,WHITE);
-            }
-
-            // Draw Credits
-            //DrawText("\tCredits : \nCode : Sesso Kosga",50,20,20,WHITE);
 
             // Left button
             if (btnLeft.isActive==0)
@@ -581,15 +584,21 @@ int main(void)
             if(ship.isEngineOn==1)
                 drawAnim(shipEngine);
 
-            //printf("Ship y : %.2f\n",ship.pos.y);
-
-            // Projectiles
 
             // Meteors
             drawMeteors();
 
             // Projectiles
             drawListProjectiles();
+
+            // Draw Game Over
+            if(ship.state==DEAD)
+            {
+                DrawTexture(txtFailed,70,300,WHITE);
+            }
+            if(gameWon)
+                DrawTexture(txtWin,100,300,WHITE);
+
         }
         EndDrawing();
         //----------------------------------------------------------------------------------

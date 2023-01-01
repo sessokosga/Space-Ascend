@@ -281,6 +281,7 @@ int main(void)
     kunoichi.pos.x=0;
     kunoichi.pos.y=SCREEN_HEIGHT-150;
     kunoichi.type= HERO;
+    kunoichi.energy=5;
     addHeroAnim(&kunoichi,LoadAnim("resources/images/Kunoichi/Run.png",RUN,8, 7,1));
     addHeroAnim(&kunoichi,LoadAnim("resources/images/Kunoichi/Idle.png",IDLE,8, 8,1));
     addHeroAnim(&kunoichi,LoadAnim("resources/images/Kunoichi/Attack_1.png",ATTACK_1,10, 5,0));
@@ -356,7 +357,7 @@ int main(void)
     Anim dead = LoadAnim("resources/images/Meteors/explosion.png",DEAD,20,10,0);
 
     float x=165,y=0;
-    for (int i=0; i<14; i++)
+    for (int i=0; i<21; i++)
     {
         if (x>=SCREEN_WIDTH)
         {
@@ -678,7 +679,7 @@ int main(void)
             // Projectiles
             drawListProjectiles();
 
-            if(meteorsCount<=0)
+            if(meteorsCount<=0 && ship.state != DEAD)
             {
                 gameWon=1;
             }
